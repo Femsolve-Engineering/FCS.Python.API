@@ -10,4 +10,4 @@ from PyFCS import DocumentBuilder
 db = DocumentBuilder(gb.geom_engine)
 
 from FCSViewer import FCSViewer
-fv = FCSViewer(3000, db, "Primoxo_STEPHandler Application")
+fv = FCSViewer(3000, db, "Primoxo_STEPHandler_Application")
