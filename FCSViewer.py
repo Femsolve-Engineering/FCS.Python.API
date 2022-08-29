@@ -68,7 +68,7 @@ class FCSViewer(object):
 
         if not self.is_available: return;
 
-        model_path = f"{self.project_folder}/{self.active_document_name}"
+        model_path = f"{self.project_folder}/{self.active_document_name}.cbf"
 
         if self.document_operator.save_document_to(self.project_folder):
             self.document_operator.close_document()
@@ -77,10 +77,12 @@ class FCSViewer(object):
         msg_request = {
             "operation":"commit_to_document",
             "arguments":{
-                "fname" : "commitToDocument",
+                "fname" : "commit_to_document",
                 "model_path" : model_path,
                 }
             }
+
+        is_ok = self.__try_send_request(self.viewer_url, msg_request)["status"]
 
     def hide_all(self) -> None:
         """
