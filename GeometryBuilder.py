@@ -1,6 +1,6 @@
 
 # Data types
-from PyFCS import ExtGeometryMeasureOperations, GEOM_Object
+from PyFCS import GEOM_Object
 from PyFCS import GEOMImpl_Gen
 from PyFCS import GEOM_Field
 from PyFCS import TColStd_HSequenceOfTransient
@@ -30,6 +30,7 @@ from PyFCS import GeometryTransformOperations
 
 # Extensions 
 from PyFCS import ExtGeometryShapeOperations
+from PyFCS import ExtGeometryMeasureOperations
 
 # IO Handling
 from PyFCS import ExportOperations
