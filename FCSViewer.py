@@ -364,21 +364,29 @@ class FCSViewer(object):
 
         str_tmp_path = ""
 
-        if self.platform == "win32":
+        if self.is_available:
 
-            str_app_data = os.getenv('APPDATA')
-            str_tmp_path = f"{str_app_data}/Femsolve Kft/{self.plugin_name}"
+            if self.platform == "win32":
 
-            if not os.path.isdir(str_tmp_path):
-                os.mkdir(str_tmp_path)
+                str_app_data = os.getenv('APPDATA')
+                str_tmp_path = f"{str_app_data}/Femsolve Kft/{self.plugin_name}"
 
-        elif self.platform == "linux":
-            # ToDo: This would need to be in an environment file
-            str_tmp_path = f"{os.path.abspath(os.path.dirname(__file__))}/../../FCS.Cloud/LinuxAppData/{self.plugin_name}"
+                if not os.path.isdir(str_tmp_path):
+                    os.mkdir(str_tmp_path)
 
-            if not os.path.isdir(str_tmp_path):
-                os.mkdir(str_tmp_path)
-                print(f"Created temporary folder for STEP exports : {str_tmp_path}!")
+            elif self.platform == "linux":
+                # ToDo: This would need to be in an environment file
+                str_tmp_path = f"{os.path.abspath(os.path.dirname(__file__))}/../../FCS.Cloud/LinuxAppData/{self.plugin_name}"
+
+                if not os.path.isdir(str_tmp_path):
+                    os.mkdir(str_tmp_path)
+                    print(f"Created temporary folder for STEP exports : {str_tmp_path}!")
+        
+        else:
+
+            print("\n !!! WARNING !!! Because no viewer is attached to external application there will not be any model files exported"
+                   +" (and thus no temporary work path is setup). Note in Batch mode, unless the user manually saves the document"
+                   +" no results will be saved! \n")
 
         return str_tmp_path
 
