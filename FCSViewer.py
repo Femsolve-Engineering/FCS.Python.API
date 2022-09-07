@@ -1,6 +1,7 @@
 
-import requests
 import os
+import requests
+import subprocess
 
 from PyFCS import ColourSelection
 from PyFCS import Palette
@@ -15,9 +16,13 @@ class FCSViewer(object):
         """
         During instantiation connects to a viewer instance. 
         """
+        from sys import platform
+
         self.viewer_id = viewer_pid
-        self.viewer_url = f'http://127.0.0.1:{self.viewer_id}/toFrontend'
-        self.is_available = True # self.has_active_viewer() # ToDo: Have some method to ping the frontend
+        self.viewer_url = '127.0.0.1'
+        self.viewer_request_url = f'http://{self.viewer_url}:{self.viewer_id}/toFrontend'
+        self.platform = platform
+        self.is_available = self.has_active_viewer() # ToDo: Have some method to ping the frontend
         self.document_operator = document_operator
         self.published_object_counter = 0
         self.plugin_name = plugin_name
@@ -26,21 +31,22 @@ class FCSViewer(object):
 
     def has_active_viewer(self) -> bool:
         """
-        Checks if the cloud viewer is active.
+        Checks if the cloud viewer's port is active by pinging it. 
         
         Legacy functionality: `salome.sg.hasDesktop()`
         """
 
-        is_ok = False
-        msg_request = {
-                "operation":"has_active_viewer",
-                "arguments":{
-                    }
-            }
+        def is_port_in_use(port: int) -> bool:
+            import socket
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                return s.connect_ex((f'{self.viewer_url}', port)) == 0
 
-        is_ok = self.__try_send_request(self.viewer_url, msg_request)["status"]
-
-        return is_ok
+        try:
+            is_running = is_port_in_use(self.viewer_id)
+            return is_running                      
+        except Exception as ex:
+            print(f"has_active_viewer failed: {ex}. Will assume no Viewer is connected!")
+            return False
 
     def update_viewer(self) -> None:
         """
@@ -55,7 +61,7 @@ class FCSViewer(object):
                     }
             }
 
-        is_ok = self.__try_send_request(self.viewer_url, msg_request)["status"]
+        is_ok = self.__try_send_request(self.viewer_request_url, msg_request)["status"]
 
     def commit_to_document(self) -> None:
         """
@@ -82,7 +88,7 @@ class FCSViewer(object):
                 }
             }
 
-        is_ok = self.__try_send_request(self.viewer_url, msg_request)["status"]
+        is_ok = self.__try_send_request(self.viewer_request_url, msg_request)["status"]
 
     def hide_all(self) -> None:
         """
@@ -97,7 +103,7 @@ class FCSViewer(object):
                     }
             }
 
-        is_ok = self.__try_send_request(self.viewer_url, msg_request)["status"]
+        is_ok = self.__try_send_request(self.viewer_request_url, msg_request)["status"]
 
     def show_only(self, entity_id: int) -> None:
         """
@@ -111,7 +117,7 @@ class FCSViewer(object):
                 "entity_id": entity_id
             }
 
-        is_ok = self.__try_send_request(self.viewer_url, msg_request)["status"]
+        is_ok = self.__try_send_request(self.viewer_request_url, msg_request)["status"]
 
     def show(self, entity_id: int) -> None:
         """
@@ -127,7 +133,7 @@ class FCSViewer(object):
                     }
             }
 
-        is_ok = self.__try_send_request(self.viewer_url, msg_request)["status"]
+        is_ok = self.__try_send_request(self.viewer_request_url, msg_request)["status"]
 
     def set_transparency(self, entity_id: int, opacity: float) -> None:
         """
@@ -143,7 +149,7 @@ class FCSViewer(object):
                     }
             }
 
-        is_ok = self.__try_send_request(self.viewer_url, msg_request)["status"]
+        is_ok = self.__try_send_request(self.viewer_request_url, msg_request)["status"]
 
     def fit_all(self) -> None:
         """
@@ -158,7 +164,7 @@ class FCSViewer(object):
                     }
             }
 
-        is_ok = self.__try_send_request(self.viewer_url, msg_request)["status"]
+        is_ok = self.__try_send_request(self.viewer_request_url, msg_request)["status"]
 
     def add_to_document(self, entity: object, name: str) -> int:
         """
@@ -199,7 +205,7 @@ class FCSViewer(object):
                 }
             }
 
-        msg_response = self.__try_send_request(self.viewer_url, msg_request)
+        msg_response = self.__try_send_request(self.viewer_request_url, msg_request)
 
         # ToDo: Increment only if response is correct
         self.published_object_counter += 1
@@ -237,7 +243,7 @@ class FCSViewer(object):
                 }
             }
 
-        dict_result = self.__try_send_request(self.viewer_url, msg_request)
+        dict_result = self.__try_send_request(self.viewer_request_url, msg_request)
 
         if dict_result["status"]: 
             list_result_ids = list(dict_result["result"]["IDs"])
@@ -300,7 +306,7 @@ class FCSViewer(object):
                 }
             }
 
-        msg_response = self.__try_send_request(self.viewer_url, msg_request)
+        msg_response = self.__try_send_request(self.viewer_request_url, msg_request)
 
     def set_object_colour(self, id: int, selected_colour: ColourSelection) -> None:
         """
@@ -328,7 +334,7 @@ class FCSViewer(object):
                 }
             }
 
-        msg_response = self.__try_send_request(self.viewer_url, msg_request)
+        msg_response = self.__try_send_request(self.viewer_request_url, msg_request)
 
 
     def __try_send_request(self, viewer_url: str, request: dict) -> dict:
@@ -356,11 +362,9 @@ class FCSViewer(object):
         Returns path to AppData folder. This is only done on Windows.
         """
 
-        from sys import platform
-
         str_tmp_path = ""
 
-        if platform == "win32":
+        if self.platform == "win32":
 
             str_app_data = os.getenv('APPDATA')
             str_tmp_path = f"{str_app_data}/Femsolve Kft/{self.plugin_name}"
@@ -368,7 +372,7 @@ class FCSViewer(object):
             if not os.path.isdir(str_tmp_path):
                 os.mkdir(str_tmp_path)
 
-        elif platform == "linux":
+        elif self.platform == "linux":
             # ToDo: This would need to be in an environment file
             str_tmp_path = f"{os.path.abspath(os.path.dirname(__file__))}/../../FCS.Cloud/LinuxAppData/{self.plugin_name}"
 
