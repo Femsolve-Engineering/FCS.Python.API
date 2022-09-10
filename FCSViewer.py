@@ -29,7 +29,7 @@ class FCSViewer(object):
         self.active_document_name = self.document_operator.get_document_name()
         self.project_folder = self.__setup_temp_folder()
 
-    def set_plugin_name(plugin_name: str) -> None:
+    def set_plugin_name(self, plugin_name: str) -> None:
         """
         Repaths project folder in app data.
         """
