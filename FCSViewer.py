@@ -11,7 +11,7 @@ class FCSViewer(object):
     The primary interactor of the FCS web viewer.
     """
 
-    def __init__(self, viewer_pid: int, document_operator: DocumentBuilder, plugin_name: str):
+    def __init__(self, viewer_pid: int, document_operator: DocumentBuilder):
         """
         During instantiation connects to a viewer instance. 
         """
@@ -20,8 +20,16 @@ class FCSViewer(object):
         self.is_available = True # self.has_active_viewer() # ToDo: Have some method to ping the frontend
         self.document_operator = document_operator
         self.published_object_counter = 0
-        self.plugin_name = plugin_name
+        self.plugin_name = "FCSPythonProject"
         self.active_document_name = self.document_operator.get_document_name()
+        self.project_folder = self.__setup_temp_folder()
+
+    def set_plugin_name(plugin_name: str) -> None:
+        """
+        Repaths project folder in app data.
+        """
+
+        self.plugin_name = plugin_name
         self.project_folder = self.__setup_temp_folder()
 
     def has_active_viewer(self) -> bool:
