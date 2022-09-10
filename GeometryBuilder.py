@@ -89,7 +89,8 @@ class GeometryBuilder(object):
     def import_step(self, complete_path: str, get_assembly_info=False) -> GEOM_Object:
         return self.import_operations.import_step(complete_path, get_assembly_info)
 
-    def export_step(self, model: GEOM_Object, exp_file: str, units: str) -> None:
+    def export_step(self, model: GEOM_Object, exp_file: str, units = "mm") -> None:
+        # ToDo: Add unit control, currently exports in 'mm' in Backend
         self.export_operations.export_step(model, exp_file)
 
     def export_stl(self, model: GEOM_Object, exp_file: str, is_binary=False) -> None:
