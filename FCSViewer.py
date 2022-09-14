@@ -179,7 +179,6 @@ class FCSViewer(object):
         Hides everything in the active document             
         Legacy functionality: `salome.sg.addToStudy(model, name)`
         """
-        if not self.is_available: return
 
         # Object order is not the same as the ID!
         object_order = self.published_object_counter + 1
@@ -198,6 +197,9 @@ class FCSViewer(object):
         except Exception as ex:
             print(f"FCSViewer: Could not publish object named {name}. Failure: {ex.args}")
             return
+
+        # If the viewer is not available, we stop here
+        if not self.is_available: return
 
         # STEP 2: SEND data to frontend
         msg_request = {
