@@ -174,6 +174,7 @@ class FCSViewer(object):
 
         is_ok = self.__try_send_request(self.viewer_request_url, msg_request)["status"]
 
+
     def add_to_document(self, entity: object, name: str) -> int:
         """
         Hides everything in the active document             
