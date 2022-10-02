@@ -174,12 +174,12 @@ class FCSViewer(object):
 
         is_ok = self.__try_send_request(self.viewer_request_url, msg_request)["status"]
 
+
     def add_to_document(self, entity: object, name: str) -> int:
         """
         Hides everything in the active document             
         Legacy functionality: `salome.sg.addToStudy(model, name)`
         """
-        if not self.is_available: return
 
         # Object order is not the same as the ID!
         object_order = self.published_object_counter + 1
@@ -198,6 +198,9 @@ class FCSViewer(object):
         except Exception as ex:
             print(f"FCSViewer: Could not publish object named {name}. Failure: {ex.args}")
             return
+
+        # If the viewer is not available, we stop here
+        if not self.is_available: return
 
         # STEP 2: SEND data to frontend
         msg_request = {
