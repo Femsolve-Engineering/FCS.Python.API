@@ -37,6 +37,19 @@ class FCSViewer(object):
         self.plugin_name = plugin_name
         self.project_folder = self.__setup_temp_folder()
 
+    def set_model_name(self, model_name: str) -> None:
+        """
+        Renames the workspace binary. Do not include extension!
+        """
+
+        default_model_path = f"{self.plugin_name}/{self.active_document_name}.cbf"
+        self.active_document_name = model_name
+        self.document_operator.set_document_name(self.active_document_name)
+
+        if os.path.exists(default_model_path):
+            os.replace(default_model_path, f"{self.plugin_name}/{self.active_document_name}.cbf")
+
+
     def has_active_viewer(self) -> bool:
         """
         Checks if the cloud viewer's port is active by pinging it. 
@@ -61,7 +74,6 @@ class FCSViewer(object):
         Updates viewer's document. Will load all added entities to the viewer               
         Legacy functionality: `salome.sg.updateObjBrowser()`
         """
-        if not self.is_available: return
 
         msg_request = {
                 "operation":"update_viewer",
@@ -85,8 +97,6 @@ class FCSViewer(object):
         if self.document_operator.save_document_to(self.project_folder):
             self.document_operator.close_document()
 
-        if not self.is_available: return;
-
         # STEP 2: SEND data to frontend
         msg_request = {
             "operation":"commit_to_document",
@@ -103,7 +113,6 @@ class FCSViewer(object):
         Hides everything in the active document             
         Legacy functionality: `salome.sg.EraseAll()`
         """
-        if not self.is_available: return
 
         msg_request = {
                 "operation":"hide_all",
@@ -118,7 +127,6 @@ class FCSViewer(object):
         Pass in unique ID of the object to show that entity only                
         Legacy functionality: `salome.sg.DisplayOnly(model_id)`
         """
-        if not self.is_available: return
 
         msg_request = {
                 "operation": "show_only",
@@ -132,7 +140,6 @@ class FCSViewer(object):
         Pass in unique ID of the object to activate entity in the viewer.              
         Legacy functionality: `salome.sg.Display(model_id)`
         """
-        if not self.is_available: return
 
         msg_request = {
                 "operation": "show",
@@ -148,7 +155,6 @@ class FCSViewer(object):
         Sets transparency of the object in the viewer.
         Legacy functionality: `gg.setTransparency(model_id)`
         """
-        if not self.is_available: return
 
         msg_request = {
                 "operation": "set_transparency",
@@ -164,7 +170,6 @@ class FCSViewer(object):
         Adjust camera that all is visible               
         Legacy functionality: `salome.sg.FitAll()`
         """
-        if not self.is_available: return
 
         msg_request = {
                 "operation":"fit_all",
@@ -198,9 +203,6 @@ class FCSViewer(object):
         except Exception as ex:
             print(f"FCSViewer: Could not publish object named {name}. Failure: {ex.args}")
             return
-
-        # If the viewer is not available, we stop here
-        if not self.is_available: return
 
         # STEP 2: SEND data to frontend
         msg_request = {
@@ -272,7 +274,6 @@ class FCSViewer(object):
 
         Legacy functionality: `geompy.getObjectID(i_Face))`
         """
-        if not self.is_available: return -1
 
         # ToDo: Need to extend the GEOM_Object to store
         # GUIDs unique to every single GEOM_Object
@@ -295,8 +296,6 @@ class FCSViewer(object):
 
         Legacy functionality: `SALOMEDS.SetColor(i_Face, list_RGB))`
         """
-
-        if not self.is_available: return
 
         print(f"Set colour to input : {id},{red},{green},{blue}")
         # Create paint 
@@ -325,7 +324,6 @@ class FCSViewer(object):
 
         Input is a specific colour that is available in the selection.
         """
-        if not self.is_available: return
 
         # Create paint
         colour = Palette.get_colour(selected_colour)
@@ -354,8 +352,10 @@ class FCSViewer(object):
         """
 
         dict_result = {
-            "status": False
+            "status": "NoViewerInstance"
             }
+
+        if not self.is_available: return dict_result
         
         try:
             response = requests.post(viewer_url, json=request)
@@ -375,8 +375,7 @@ class FCSViewer(object):
 
         str_tmp_path = ""
 
-        if self.is_available:
-
+        try:
             if self.platform == "win32":
 
                 str_app_data = os.getenv('APPDATA')
@@ -392,8 +391,19 @@ class FCSViewer(object):
                 if not os.path.isdir(str_tmp_path):
                     os.mkdir(str_tmp_path)
                     print(f"Created temporary folder for STEP exports : {str_tmp_path}!")
+
+        except Exception as ex:
+
+            if self.is_available: 
+                
+                print(f"Failed to create TEMP directories with an AVAILABLE viewer hooked up! Exception: {ex} \n")
+                self.is_available = False
+
+            else:
+
+                print (f"Failed to create TEMP directories. Exception: Exception: {ex} \n")
         
-        else:
+        if not self.is_available:
 
             print("\n !!! WARNING !!! Because no viewer is attached to external application there will not be any model files exported"
                    +" (and thus no temporary work path is setup). Note in Batch mode, unless the user manually saves the document"
