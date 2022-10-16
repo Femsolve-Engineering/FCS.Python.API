@@ -22,7 +22,8 @@ class FCSViewer(object):
         self.viewer_url = '127.0.0.1'
         self.viewer_request_url = f'http://{self.viewer_url}:{self.viewer_id}/toFrontend'
         self.platform = platform
-        self.is_available = self.has_active_viewer() # ToDo: Have some method to ping the frontend
+        self.is_available = self.has_active_viewer()
+        self.is_viewer_compatible = self.has_compatible_viewer()
         self.document_operator = document_operator
         self.published_object_counter = 0
         self.plugin_name = "FCSPythonProject"
@@ -68,6 +69,27 @@ class FCSViewer(object):
         except Exception as ex:
             print(f"has_active_viewer failed: {ex}. Will assume no Viewer is connected!")
             return False
+
+    def has_compatible_viewer(self) -> bool:
+        """
+        If a viewer instance was found, we check if its version 
+        is in coherence with the backend's version.
+        """
+
+        from PyFCS import check_api_compatibility
+        from PyFCS import get_backend_api_version
+
+        if not self.is_available: return False
+
+        response = requests.get(f"http://{self.viewer_url}:{self.viewer_id}/version")
+
+        viewer_version = response.text
+        if not check_api_compatibility(viewer_version):
+            print(f"!!! Viewer instance version ({viewer_version}) is not compatible with current backend API version ({get_backend_api_version()})!!!")
+            self.is_available = False
+
+        return True
+
 
     def update_viewer(self) -> None:
         """
