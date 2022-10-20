@@ -772,7 +772,7 @@ class GeometryBuilder(object):
     def check_self_intersections_fast(self, the_shape: GEOM_Object, deflection: float, tolerance: float, the_intersections: list) -> bool:
         return self.measure_operations.check_self_intersections_fast(the_shape, deflection, tolerance, the_intersections)
 
-    def check_b_o_p_arguments(self, the_shape: GEOM_Object) -> bool:
+    def check_bop_arguments(self, the_shape: GEOM_Object) -> bool:
         return self.measure_operations.check_b_o_p_arguments(the_shape)
 
     #def fast_intersect(self, the_shape1: GEOM_Object, the_shape2: GEOM_Object, tolerance = 0.0, deflection = 1e-6, the_intersections1: list, the_intersections2: list) -> bool:
@@ -854,8 +854,15 @@ class GeometryBuilder(object):
     def get_position(self, the_shape: GEOM_Object) -> list:
         return self.ext_measure_operations.get_position(the_shape)
 
-    def bounding_box(self, the_shape: GEOM_Object, precise = False) -> None:
+    def bounding_box(self, the_shape: GEOM_Object, precise = False) -> list:
         return self.ext_measure_operations.bounding_box(the_shape, precise)
+
+    def oriented_bounding_box(self, the_shape: GEOM_Object) -> list:
+        """
+        Return list structure:
+            [ X_extension, Y_extension, Z_extension, bounding box shape ]
+        """
+        return self.ext_measure_operations.oriented_bounding_box(the_shape, False)
 
     """
     Methods for ShapeOperations
