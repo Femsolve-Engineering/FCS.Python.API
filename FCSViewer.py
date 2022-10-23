@@ -130,15 +130,74 @@ class FCSViewer(object):
 
         is_ok = self.__try_send_request(self.viewer_request_url, msg_request)["status"]
 
+    def hide(self, entity_id: int) -> None:
+        """
+        Hides a single item in the viewer.
+        """
+
+        _ = self.document_operator.set_object_visibility(entity_id, False)
+
+        msg_request = {
+                "operation": "hide",
+                "arguments":{
+                    "entity_id": entity_id
+                    }
+            }
+
+        is_ok = self.__try_send_request(self.viewer_request_url, msg_request)["status"]
+
+    def hide_only(self, entity_id: int) -> None:
+        """
+        Only sets this given item to be hidden all the rest will be shown.
+        """
+
+        list_component_ids = self.document_operator.get_added_component_ids()
+
+        for component_id in list_component_ids:
+            _ = self.document_operator.set_object_visibility(True)
+
+        _ = self.document_operator.set_object_visibility(False)
+
+        msg_request = {
+            "operation": "hide_only",
+            "arguments":{
+                "entity_id": entity_id
+                }
+        }
+
+        is_ok = self.__try_send_request(self.viewer_request_url, msg_request)["status"]
+
     def hide_all(self) -> None:
         """
         Hides everything in the active document             
         Legacy functionality: `salome.sg.EraseAll()`
         """
 
+        list_component_ids = self.document_operator.get_added_component_ids()
+
+        for component_id in list_component_ids:
+            _ = self.document_operator.set_object_visibility(False)
+
         msg_request = {
                 "operation":"hide_all",
                 "arguments":{
+                    }
+            }
+
+        is_ok = self.__try_send_request(self.viewer_request_url, msg_request)["status"]
+
+    def show(self, entity_id: int) -> None:
+        """
+        Pass in unique ID of the object to activate entity in the viewer.              
+        Legacy functionality: `salome.sg.Display(model_id)`
+        """
+
+        _ = self.document_operator.set_object_visibility(entity_id, True)
+
+        msg_request = {
+                "operation": "show",
+                "arguments":{
+                    "entity_id": entity_id
                     }
             }
 
@@ -150,6 +209,14 @@ class FCSViewer(object):
         Legacy functionality: `salome.sg.DisplayOnly(model_id)`
         """
 
+        list_component_ids = self.document_operator.get_added_component_ids()
+
+        for component_id in list_component_ids:
+            if component_id == entity_id:
+                _ = self.document_operator.set_object_visibility(True)
+            else:
+                _ = self.document_operator.set_object_visibility(False)
+
         msg_request = {
                 "operation": "show_only",
                 "entity_id": entity_id
@@ -157,17 +224,18 @@ class FCSViewer(object):
 
         is_ok = self.__try_send_request(self.viewer_request_url, msg_request)["status"]
 
-    def show(self, entity_id: int) -> None:
+    def show_all(self) -> None:
         """
-        Pass in unique ID of the object to activate entity in the viewer.              
-        Legacy functionality: `salome.sg.Display(model_id)`
+        Displays all entities in the viewer.
         """
 
+        list_component_ids = self.document_operator.get_added_component_ids()
+
+        for component_id in list_component_ids:
+            _ = self.document_operator.set_object_visibility(True)
+
         msg_request = {
-                "operation": "show",
-                "arguments":{
-                    "entity_id": entity_id
-                    }
+                "operation": "show_all",
             }
 
         is_ok = self.__try_send_request(self.viewer_request_url, msg_request)["status"]
@@ -178,10 +246,13 @@ class FCSViewer(object):
         Legacy functionality: `gg.setTransparency(model_id)`
         """
 
+        _ = self.document_operator.set_object_opacity(entity_id, opacity)
+
         msg_request = {
                 "operation": "set_transparency",
                 "arguments":{
-                    "entity_id": entity_id
+                    "entity_id": entity_id,
+                    "opacity":opacity
                     }
             }
 
