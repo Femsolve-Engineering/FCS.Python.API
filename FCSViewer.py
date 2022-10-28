@@ -154,9 +154,9 @@ class FCSViewer(object):
         list_component_ids = self.document_operator.get_added_component_ids()
 
         for component_id in list_component_ids:
-            _ = self.document_operator.set_object_visibility(True)
+            _ = self.document_operator.set_object_visibility(component_id, True)
 
-        _ = self.document_operator.set_object_visibility(False)
+        _ = self.document_operator.set_object_visibility(component_id, False)
 
         msg_request = {
             "operation": "hide_only",
@@ -176,7 +176,7 @@ class FCSViewer(object):
         list_component_ids = self.document_operator.get_added_component_ids()
 
         for component_id in list_component_ids:
-            _ = self.document_operator.set_object_visibility(False)
+            _ = self.document_operator.set_object_visibility(component_id, False)
 
         msg_request = {
                 "operation":"hide_all",
@@ -213,9 +213,9 @@ class FCSViewer(object):
 
         for component_id in list_component_ids:
             if component_id == entity_id:
-                _ = self.document_operator.set_object_visibility(True)
+                _ = self.document_operator.set_object_visibility(component_id, True)
             else:
-                _ = self.document_operator.set_object_visibility(False)
+                _ = self.document_operator.set_object_visibility(component_id, False)
 
         msg_request = {
                 "operation": "show_only",
@@ -232,7 +232,7 @@ class FCSViewer(object):
         list_component_ids = self.document_operator.get_added_component_ids()
 
         for component_id in list_component_ids:
-            _ = self.document_operator.set_object_visibility(True)
+            _ = self.document_operator.set_object_visibility(component_id, True)
 
         msg_request = {
                 "operation": "show_all",

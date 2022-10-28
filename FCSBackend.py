@@ -1,4 +1,5 @@
 """
+22.10.15.3 - Hot fix to set_object_visibility method
 22.10.15.2 - Visibility API
 22.10.15.1 - First API version checking.
 """
