@@ -275,7 +275,7 @@ class FCSViewer(object):
 
     def add_to_document(self, entity: object, name: str) -> int:
         """
-        Hides everything in the active document             
+        Adds a brand new top-level component.
         Legacy functionality: `salome.sg.addToStudy(model, name)`
         """
 
@@ -324,14 +324,50 @@ class FCSViewer(object):
         """
         pass 
 
-    def add_to_document_under(self, child_entity: object, father_entity: int, name: str) -> None:
+    def add_to_document_under(self, entity: object, parent_entity_id: int, name: str) -> None:
         """
         Adds entity under a parent entity               
         Legacy functionality: `geompy.addToStudyInFather( self.Model, i_Face, str_Name )`
         """
-        if not self.is_available: return
 
-        # ToDo: Add implementation once hierarchy exists in FCS Viewer
+        # Object order is not the same as the ID!
+        object_order = self.published_object_counter + 1
+        item_id = -1
+
+        export_stl_name = f"{object_order}_{name}.stl"
+        export_t2g_name = f"{object_order}_{name}_geom.json"
+
+        # STEP 1: EXPORT geometry
+        express_static_folder = f"{self.plugin_name}"
+        t2g_path_static = express_static_folder + '/' + export_t2g_name
+        stl_path_static = express_static_folder + '/' + export_stl_name
+        try:
+            export_to_path = self.project_folder
+            item_id = self.document_operator.add_to_document_under(entity, parent_entity_id, f"{object_order}_{name}", export_to_path)
+        except Exception as ex:
+            print(f"FCSViewer: Could not publish object named {name}. Failure: {ex.args}")
+            return
+
+        # STEP 2: SEND data to frontend
+        msg_request = {
+            "operation":"add_to_document",
+            "arguments":{
+                "name" : name,
+                "item_id" : str(item_id),
+                "t2g_file" : export_t2g_name,
+                "stl_file" : export_stl_name,
+                "stl_path" : express_static_folder,
+                "stl_path_static" : stl_path_static,
+                "t2g_path_static" : t2g_path_static
+                }
+            }
+
+        msg_response = self.__try_send_request(self.viewer_request_url, msg_request)
+
+        # ToDo: Increment only if response is correct
+        self.published_object_counter += 1
+
+        return item_id
 
     def find_object_from_viewer_by_name(self, name: str) -> list:
         """
