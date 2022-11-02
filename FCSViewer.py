@@ -350,10 +350,11 @@ class FCSViewer(object):
 
         # STEP 2: SEND data to frontend
         msg_request = {
-            "operation":"add_to_document",
+            "operation":"add_to_document_under",
             "arguments":{
                 "name" : name,
                 "item_id" : str(item_id),
+                "parent_id":str(parent_entity_id),
                 "t2g_file" : export_t2g_name,
                 "stl_file" : export_stl_name,
                 "stl_path" : express_static_folder,
