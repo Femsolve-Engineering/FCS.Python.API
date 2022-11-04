@@ -320,9 +320,28 @@ class FCSViewer(object):
 
     def remove_from_document(self, object_id: int) -> None:
         """
-        Removes all child entities under this ID.  
+        Removes all child entities under this ID. 
+        All components that were removed from the document
+        need to be updated. The removed_ids must contain the passed in ID itself.
         """
-        pass 
+        
+        try:
+            removed_ids = db.remove_from_document(object_id)
+            if len(removed_ids) == 0:
+                raise Exception('Empty array returned for removed objects!')
+        except Exception as ex:
+            print(f'FCSViewer: Failed to remove {object_id}. Exception: {ex.args}')
+            return
+
+        msg_request = {
+            "operation":"add_to_document",
+            "arguments":{
+                "removed_ids" : str(removed_ids)
+                }
+            }
+
+        msg_response = self.__try_send_request(self.viewer_request_url, msg_request)
+        return
 
     def add_to_document_under(self, entity: object, parent_entity_id: int, name: str) -> None:
         """
