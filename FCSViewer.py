@@ -444,9 +444,9 @@ class FCSViewer(object):
         Private method to try forward request to cloud viewer.
         """
 
-        dict_result = {
-            "status": "NoViewerInstance"
-            }
+        #dict_result = {
+        #    "status": "NoViewerInstance"
+        #    }
 
         if not self.is_available: return dict_result
         
