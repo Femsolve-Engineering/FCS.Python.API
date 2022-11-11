@@ -1074,12 +1074,12 @@ class GeometryBuilder(object):
     def get_sub_shapes_indices(self, the_main_shape: GEOM_Object, the_sub_shapes: list) -> list:
         return self.ext_shape_operations.get_sub_shapes_indices(the_main_shape, the_sub_shapes)
 
-    def get_hidden_and_visible_edges(self, main_shape: GEOM_Object, camera_position: list, camera_direction: list, should_include_hidden = True) -> list:
+    def get_visible_and_hidden_edges(self, main_shape: GEOM_Object, camera_position = [0,0,0], camera_direction = [0,0,1], should_include_hidden = True) -> list:
         """
         Expected input for camera position and direction is a list with three doubles:
             e.g. camera_position = [0, 0, 10] and camera_direction = [0, 0, -1]
         """
-        return self.ext_shape_operations.get_hidden_and_visible_edges(main_shape, camera_position, camera_direction, should_include_hidden)
+        return self.ext_shape_operations.get_visible_and_hidden_edges(main_shape, camera_position, camera_direction, should_include_hidden)
 
     """
     Methods for TransformOperations
