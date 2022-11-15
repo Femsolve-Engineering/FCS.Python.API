@@ -446,7 +446,7 @@ class FCSViewer(object):
         Legacy functionality: `SALOMEDS.SetColor(i_Face, list_RGB))`
         """
 
-        print(f"Set colour to input : {id},{red},{green},{blue}")
+        # print(f"Set colour to input : (ID) {id}, (R) {red}, (G) {green}, (B) {blue}")
         # Create paint 
         colour = Palette.get_specific_colour(red, green, blue)
 
