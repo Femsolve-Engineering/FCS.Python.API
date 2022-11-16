@@ -504,7 +504,7 @@ class FCSViewer(object):
         #    "status": "NoViewerInstance"
         #    }
 
-        if not self.is_available: return dict_result
+        if not self.is_available: return {}
         
         try:
             response = requests.post(viewer_url, json=request)

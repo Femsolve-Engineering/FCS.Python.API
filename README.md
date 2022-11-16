@@ -2,6 +2,7 @@
 Provides Python methods bound to high-performance libraries for fast delivery of engineering applications.
 
 ## Version Log
+- 22.11.1.5  - Avoid failure if no viewer instance is attached
 - 22.11.1.4  - Remove colouring logs
 - 22.11.1.3  - Projection method naming change.
 - 22.11.1.2  - Shape tools extended (HLR projection)
