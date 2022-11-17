@@ -77,6 +77,7 @@ class GeometryBuilder(object):
         # Instantiate extension operators
         self.ext_shape_operations = ExtGeometryShapeOperations(self.shape_operations)
         self.ext_measure_operations = ExtGeometryMeasureOperations(self.measure_operations)
+        self.ext_boolean_operations = ExtBooleanOperations(self.boolean_operations)
 
         # Instantiate generic operators
         self.export_operations = ExportOperations(self.geom_engine)
@@ -406,6 +407,12 @@ class GeometryBuilder(object):
     def make_cut_list(self, the_main_shape: GEOM_Object, the_shapes: TColStd_HSequenceOfTransient, is_check_self_inte: bool) -> GEOM_Object:
         return self.boolean_operations.make_cut_list(the_main_shape, the_shapes, is_check_self_inte)
 
+    def make_half_partition(self, the_shape: GEOM_Object, the_plane: GEOM_Object) -> GEOM_Object:
+        return self.boolean_operations.make_half_partition(the_shape, the_plane)
+
+    """
+    Methods for Boolean Extension Operations
+    """
     def make_partition(self, 
                        the_shapes: list, 
                        the_tools = [], 
@@ -417,10 +424,8 @@ class GeometryBuilder(object):
                        the_keep_nonlimit_shapes = 0, 
                        the_perform_self_intersections = False, 
                        is_check_self_inte = False) -> GEOM_Object:
-        return self.boolean_operations.make_partition(the_shapes, the_tools, the_keep_inside, the_remove_inside, the_limit, the_remove_webs, the_materials, the_keep_nonlimit_shapes, the_perform_self_intersections, is_check_self_inte)
+        return self.ext_boolean_operations.make_partition(the_shapes, the_tools, the_keep_inside, the_remove_inside, the_limit, the_remove_webs, the_materials, the_keep_nonlimit_shapes, the_perform_self_intersections, is_check_self_inte)
 
-    def make_half_partition(self, the_shape: GEOM_Object, the_plane: GEOM_Object) -> GEOM_Object:
-        return self.boolean_operations.make_half_partition(the_shape, the_plane)
 
     """
     Methods for CurveOperations
