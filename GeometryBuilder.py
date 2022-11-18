@@ -31,6 +31,7 @@ from PyFCS import GeometryTransformOperations
 # Extensions 
 from PyFCS import ExtGeometryShapeOperations
 from PyFCS import ExtGeometryMeasureOperations
+from PyFCS import ExtGeometryBooleanOperations
 
 # IO Handling
 from PyFCS import ExportOperations
@@ -77,7 +78,7 @@ class GeometryBuilder(object):
         # Instantiate extension operators
         self.ext_shape_operations = ExtGeometryShapeOperations(self.shape_operations)
         self.ext_measure_operations = ExtGeometryMeasureOperations(self.measure_operations)
-        self.ext_boolean_operations = ExtBooleanOperations(self.boolean_operations)
+        self.ext_boolean_operations = ExtGeometryBooleanOperations(self.boolean_operations)
 
         # Instantiate generic operators
         self.export_operations = ExportOperations(self.geom_engine)

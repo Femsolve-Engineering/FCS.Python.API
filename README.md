@@ -2,6 +2,7 @@
 Provides Python methods bound to high-performance libraries for fast delivery of engineering applications.
 
 ## Version Log
+- 22.11.1.7  - MakePartition API hotfix
 - 22.11.1.6  - MakePartition API update
 - 22.11.1.5  - Avoid failure if no viewer is attached
 - 22.11.1.4  - Remove colouring logs
