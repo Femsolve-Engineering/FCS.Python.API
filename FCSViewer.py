@@ -97,6 +97,9 @@ class FCSViewer(object):
         Legacy functionality: `salome.sg.updateObjBrowser()`
         """
 
+        #ToDo: Implement this on client side
+        return; 
+
         msg_request = {
                 "operation":"update_viewer",
                 "arguments":{
@@ -128,12 +131,15 @@ class FCSViewer(object):
                 }
             }
 
-        is_ok = self.__try_send_request(self.viewer_request_url, msg_request)["status"]
+        is_ok = self.__try_send_request(self.viewer_request_url, msg_request)
 
     def hide(self, entity_id: int) -> None:
         """
         Hides a single item in the viewer.
         """
+
+        #ToDo: Implement this on client side
+        return; 
 
         _ = self.document_operator.set_object_visibility(entity_id, False)
 
@@ -173,6 +179,9 @@ class FCSViewer(object):
         Legacy functionality: `salome.sg.EraseAll()`
         """
 
+        #ToDo: Implement this on client side
+        return; 
+
         list_component_ids = self.document_operator.get_added_component_ids()
 
         for component_id in list_component_ids:
@@ -208,6 +217,9 @@ class FCSViewer(object):
         Pass in unique ID of the object to show that entity only                
         Legacy functionality: `salome.sg.DisplayOnly(model_id)`
         """
+
+        #ToDo: Implement this on client side
+        return; 
 
         list_component_ids = self.document_operator.get_added_component_ids()
 
@@ -263,6 +275,9 @@ class FCSViewer(object):
         Adjust camera that all is visible               
         Legacy functionality: `salome.sg.FitAll()`
         """
+
+        #ToDo: Implement this on client side
+        return; 
 
         msg_request = {
                 "operation":"fit_all",
