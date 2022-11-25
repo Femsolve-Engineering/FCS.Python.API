@@ -157,6 +157,9 @@ class FCSViewer(object):
         Only sets this given item to be hidden all the rest will be shown.
         """
 
+        #ToDo: Implement this on client side
+        return; 
+
         list_component_ids = self.document_operator.get_added_component_ids()
 
         for component_id in list_component_ids:
@@ -200,6 +203,9 @@ class FCSViewer(object):
         Pass in unique ID of the object to activate entity in the viewer.              
         Legacy functionality: `salome.sg.Display(model_id)`
         """
+
+        #ToDo: Implement this on client side
+        return; 
 
         _ = self.document_operator.set_object_visibility(entity_id, True)
 
@@ -258,6 +264,8 @@ class FCSViewer(object):
         Legacy functionality: `gg.setTransparency(model_id)`
         """
 
+        if entity_id == -1: return
+
         _ = self.document_operator.set_object_opacity(entity_id, opacity)
 
         msg_request = {
@@ -310,7 +318,7 @@ class FCSViewer(object):
             item_id = self.document_operator.add_to_document(entity, f"{object_order}_{name}", export_to_path)
         except Exception as ex:
             print(f"FCSViewer: Could not publish object named {name}. Failure: {ex.args}")
-            return
+            return item_id
 
         # STEP 2: SEND data to frontend
         msg_request = {
@@ -339,6 +347,8 @@ class FCSViewer(object):
         All components that were removed from the document
         need to be updated. The removed_ids must contain the passed in ID itself.
         """
+
+        if object_id == -1: return
         
         try:
             removed_ids = db.remove_from_document(object_id)
@@ -364,9 +374,11 @@ class FCSViewer(object):
         Legacy functionality: `geompy.addToStudyInFather( self.Model, i_Face, str_Name )`
         """
 
+        item_id = -1
+        if parent_entity_id == -1: return item_id
+
         # Object order is not the same as the ID!
         object_order = self.published_object_counter + 1
-        item_id = -1
 
         export_stl_name = f"{object_order}_{name}.stl"
         export_t2g_name = f"{object_order}_{name}_geom.json"
@@ -380,7 +392,7 @@ class FCSViewer(object):
             item_id = self.document_operator.add_to_document_under(entity, parent_entity_id, f"{object_order}_{name}", export_to_path)
         except Exception as ex:
             print(f"FCSViewer: Could not publish object named {name}. Failure: {ex.args}")
-            return
+            return item_id
 
         # STEP 2: SEND data to frontend
         msg_request = {
@@ -460,6 +472,7 @@ class FCSViewer(object):
 
         Legacy functionality: `SALOMEDS.SetColor(i_Face, list_RGB))`
         """
+        if id == -1: return
 
         # print(f"Set colour to input : (ID) {id}, (R) {red}, (G) {green}, (B) {blue}")
         # Create paint 
@@ -488,6 +501,7 @@ class FCSViewer(object):
 
         Input is a specific colour that is available in the selection.
         """
+        if id == -1: return
 
         # Create paint
         colour = Palette.get_colour(selected_colour)
