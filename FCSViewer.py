@@ -368,11 +368,14 @@ class FCSViewer(object):
         msg_response = self.__try_send_request(self.viewer_request_url, msg_request)
         return
 
-    def add_to_document_under(self, entity: object, parent_entity_id: int, name: str) -> None:
+    def add_to_document_under(self, entity: object, parent_entity_id: int, name: str) -> int:
         """
         Adds entity under a parent entity               
         Legacy functionality: `geompy.addToStudyInFather( self.Model, i_Face, str_Name )`
         """
+
+        #ToDo: Implement this on client side
+        return -1; 
 
         item_id = -1
         if parent_entity_id == -1: return item_id
