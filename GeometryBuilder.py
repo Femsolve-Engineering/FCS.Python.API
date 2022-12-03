@@ -95,8 +95,19 @@ class GeometryBuilder(object):
         # ToDo: Add unit control, currently exports in 'mm' in Backend
         self.export_operations.export_step(model, exp_file)
 
-    def export_stl(self, model: GEOM_Object, exp_file: str, is_binary=False) -> None:
-        self.export_operations.export_stl(model, exp_file, is_binary)
+    def export_stl(self, model: GEOM_Object, exp_file: str, tesselation_size: float=0.0, is_binary=False) -> None:
+        """
+        If tesselation size is non-positive it will estimate it on its own (recommended for general purpose).
+        If you want to modify your mesh size, it is recommended to first query the default stl size and then
+        reduce/increase the tesselation size accordingly.
+        """
+        self.export_operations.export_stl(model, exp_file, tesselation_size, is_binary)
+
+    def get_default_stl_size(self, model: GEOM_Object) -> float:
+        return self.export_operations.get_default_stl_size(model)
+
+    def get_refined_stl_size(self, model: GEOM_Object) -> float:
+        return self.export_operations.get_refined_stl_size(model)
 
     def get_t2g_file_last_export(self) -> str:
         return self.export_operations.get_t2g_file_path()

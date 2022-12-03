@@ -2,6 +2,7 @@
 Provides Python methods bound to high-performance libraries for fast delivery of engineering applications.
 
 ## Version Log
+- 22.11.1.10 - Added STL size estimation methods, exporting STLs with set size possible
 - 22.11.1.9  - Invalid ID guards before methods
 - 22.11.1.8  - Disabled visibility API methods (temporarily)
 - 22.11.1.7  - MakePartition API hotfix
