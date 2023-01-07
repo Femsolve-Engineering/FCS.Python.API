@@ -368,6 +368,75 @@ class FCSViewer(object):
         msg_response = self.__try_send_request(self.viewer_request_url, msg_request)
         return
 
+    def add_new_container(self, name: str) -> int:
+        """
+        Creates a TOP LEVEL empty container that will not store any geometric objects 
+        at its unique ID. It is used to group together and organize other entities
+        in the model tree.
+        """
+
+        item_id = -1
+
+        #ToDo: Implement this on client side
+        # return item_id; 
+
+        try:
+            item_id = self.document_operator.add_new_container(name)
+        except Exception as ex:
+            print(f"FCSViewer: Could not publish container named {name}. Failure: {ex.args}")
+            return item_id
+
+        msg_request = {
+            "operation":"add_new_container_under",
+            "arguments":{
+                "name" : name,
+                "item_id" : str(item_id),
+                "parent_id":"0", # 0 means top level
+                }
+            }
+
+        msg_response = self.__try_send_request(self.viewer_request_url, msg_request)
+
+        # ToDo: Increment only if response is correct
+        self.published_object_counter += 1
+
+        return item_id
+
+    def add_new_container_under(self, name: str, parent_id: int) -> int:
+        """
+        Creates an empty container NESTED UNDER A PARENT that will not store any geometric 
+        objects at its unique ID. It is used to group together and organize other entities
+        in the model tree.
+        """
+
+        item_id = -1
+
+        #ToDo: Implement this on client side
+        # return item_id; 
+
+        try:
+            item_id = self.document_operator.add_new_container_under(name, parent_id)
+        except Exception as ex:
+            print(f"FCSViewer: Could not publish container named {name}. Failure: {ex.args}")
+            return item_id
+
+        msg_request = {
+            "operation":"add_new_container_under",
+            "arguments":{
+                "name" : name,
+                "item_id" : str(item_id),
+                "parent_id": str(parent_id), # 0 means top level
+                }
+            }
+
+        msg_response = self.__try_send_request(self.viewer_request_url, msg_request)
+
+        # ToDo: Increment only if response is correct
+        self.published_object_counter += 1
+
+        return item_id
+
+
     def add_to_document_under(self, entity: object, parent_entity_id: int, name: str) -> int:
         """
         Adds entity under a parent entity               
