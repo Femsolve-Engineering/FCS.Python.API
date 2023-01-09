@@ -375,7 +375,7 @@ class FCSViewer(object):
         """
 
         #ToDo: Implement this on client side
-        return -1; 
+        #return -1; 
 
         item_id = -1
         if parent_entity_id == -1: return item_id
