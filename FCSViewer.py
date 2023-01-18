@@ -387,11 +387,11 @@ class FCSViewer(object):
             return item_id
 
         msg_request = {
-            "operation":"add_new_container_under",
+            "operation":"add_new_container",
             "arguments":{
                 "name" : name,
                 "item_id" : str(item_id),
-                "parent_id":"0", # 0 means top level
+                "folderName": "Component", # !!! Hardcoded for now !!!
                 }
             }
 
