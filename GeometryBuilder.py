@@ -848,7 +848,7 @@ class GeometryBuilder(object):
     """
 
     def get_basic_properties(self, the_shape: GEOM_Object, the_tolerance = 1e-6) -> list:
-        return self.ext_measure_operations.get_basic_properties(the_shape, the_tolerance);
+        return self.ext_measure_operations.get_basic_properties(the_shape, the_tolerance)
 
     def kind_of_shape(self, the_shape: GEOM_Object) -> list:
         return self.ext_measure_operations.kind_of_shape(the_shape)
