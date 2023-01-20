@@ -443,8 +443,8 @@ class FCSViewer(object):
         Legacy functionality: `geompy.addToStudyInFather( self.Model, i_Face, str_Name )`
         """
 
-        #ToDo: Implement this on client side
-        #return -1; 
+        if entity == None or parent_entity_id == -1 or name == "":
+            raise Exception("Wrong input data provided for add_to_document_under!")
 
         item_id = -1
         if parent_entity_id == -1: return item_id
