@@ -26,17 +26,19 @@ class FCSViewer(object):
         self.is_viewer_compatible = self.has_compatible_viewer()
         self.document_operator = document_operator
         self.published_object_counter = 0
+        self.nested_object_counter = 0
         self.plugin_name = "FCSPythonProject"
         self.active_document_name = self.document_operator.get_document_name()
         self.project_folder = self.__setup_temp_folder()
 
-    def set_plugin_name(self, plugin_name: str) -> None:
+    def set_plugin_name(self, plugin_name: str, log_debug_information: bool=False) -> None:
         """
         Repaths project folder in app data.
         """
 
         self.plugin_name = plugin_name
         self.project_folder = self.__setup_temp_folder()
+        self.log_debug_information = log_debug_information
 
     def set_model_name(self, model_name: str) -> None:
         """
@@ -311,8 +313,8 @@ class FCSViewer(object):
 
         # STEP 1: EXPORT geometry
         express_static_folder = f"{self.plugin_name}"
-        t2g_path_static = express_static_folder + '/' + export_t2g_name
-        stl_path_static = express_static_folder + '/' + export_stl_name
+        t2g_path_static = f'{express_static_folder}/{export_t2g_name}'
+        stl_path_static = f'{express_static_folder}/{export_stl_name}'
         try:
             export_to_path = self.project_folder
             item_id = self.document_operator.add_to_document(entity, f"{object_order}_{name}", export_to_path)
@@ -338,6 +340,8 @@ class FCSViewer(object):
 
         # ToDo: Increment only if response is correct
         self.published_object_counter += 1
+        if self.log_debug_information:
+            print(f'FCSViewer DEBUG: Total number of published objects {self.published_object_counter}')
 
         return item_id
 
@@ -443,7 +447,9 @@ class FCSViewer(object):
         Legacy functionality: `geompy.addToStudyInFather( self.Model, i_Face, str_Name )`
         """
 
-        print(f"FCSViewer: Trying to add {name} under {parent_entity_id}.")
+        if self.log_debug_information:
+            print(f"FCSViewer DEBUG: Trying to add {name} under {parent_entity_id}.")
+
         if entity == None or parent_entity_id == -1 or name == "":
             raise Exception("Wrong input data provided for add_to_document_under!")
 
@@ -458,8 +464,8 @@ class FCSViewer(object):
 
         # STEP 1: EXPORT geometry
         express_static_folder = f"{self.plugin_name}"
-        t2g_path_static = express_static_folder + '/' + export_t2g_name
-        stl_path_static = express_static_folder + '/' + export_stl_name
+        t2g_path_static = f'{express_static_folder}/{export_t2g_name}'
+        stl_path_static = f'{express_static_folder}/{export_stl_name}'
         try:
             export_to_path = self.project_folder
             item_id = self.document_operator.add_to_document_under(entity, parent_entity_id, f"{object_order}_{name}", export_to_path)
@@ -486,6 +492,9 @@ class FCSViewer(object):
 
         # ToDo: Increment only if response is correct
         self.published_object_counter += 1
+        self.nested_object_counter += 1
+        if self.log_debug_information:
+            print(f'FCSViewer DEBUG: Published {self.nested_object_counter} nested objects. ({self.published_object_counter} in total)')
 
         return item_id
 
