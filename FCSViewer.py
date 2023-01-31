@@ -24,6 +24,7 @@ class FCSViewer(object):
         self.platform = platform
         self.is_available = self.has_active_viewer()
         self.is_viewer_compatible = self.has_compatible_viewer()
+        self.log_debug_information = False
         self.document_operator = document_operator
         self.published_object_counter = 0
         self.nested_object_counter = 0
