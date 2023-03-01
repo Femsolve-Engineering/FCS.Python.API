@@ -185,7 +185,7 @@ class FCSViewer(object):
         """
 
         #ToDo: Implement this on client side
-        return; 
+        #return; 
 
         list_component_ids = self.document_operator.get_added_component_ids()
 
