@@ -22,8 +22,9 @@ class BackendService(object):
         To any backend service connect we pass on the instances of the main operators.
         """
 
+        # ToDo: Set session services
+        self.gb = gb # Only need a single instance right now
         self.fv = fcs_viewer
-        self.gb = gb
         self.db = self.fv.db
 
     def run_command(self, command_name: str, command_args: dict={}) -> bool:

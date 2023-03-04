@@ -4,11 +4,6 @@ import requests
 import subprocess
 from sys import platform
 
-# Global instance for not user or document bound operations
-global gb 
-from GeometryBuilder import GeometryBuilder
-gb = GeometryBuilder()
-
 from PyFCS import ColourSelection
 from PyFCS import Palette
 from PyFCS import DocumentBuilder
@@ -20,6 +15,10 @@ if not check_api_compatibility(FCS_PYTHON_API_VERSION):
     raise Exception(f"Incompatible backend API!\n"
                    f"Please make sure that a major version of {get_backend_api_version()} is used.")
 
+# Global instance for not user or document bound operations
+global gb 
+from GeometryBuilder import GeometryBuilder
+gb = GeometryBuilder()
 
 class FCSViewer(object):
     """
@@ -32,6 +31,7 @@ class FCSViewer(object):
         """
 
         self.db = DocumentBuilder(gb.geom_engine)
+        self.gb = gb
         self.viewer_id = 3000
         # `user_id` can be set to 'local' for debugging and dev purposes,
         # in production mode, this is filled in automatically
