@@ -44,7 +44,7 @@ class FCSViewer(object):
         self.log_debug_information = False
         self.published_object_counter = 0
         self.nested_object_counter = 0
-        self.plugin_name = f"FCSPythonProject_{self.user_id}"
+        self.plugin_name = f"{self.user_id}"
         self.active_document_name = self.db.get_document_name()
         self.project_folder = self.__setup_temp_folder()
 
