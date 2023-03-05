@@ -27,21 +27,21 @@ class BackendService(object):
         self.fv = fcs_viewer
         self.db = self.fv.db
 
-    def run_command(self, command_name: str, command_args: dict={}) -> bool:
+    def run_command(self, command_name: str, command_args: dict={}) -> dict:
         """
         Returns true, if the command was found and run (even if it failed).
         Return false otherwise.
         """
         try:
             command_ptr = getattr(self, command_name)
-            command_ptr(command_args)
+            result = command_ptr(command_args)
+            return result
         except AttributeError:
             print(f'Could not find {command_name}!')
-            return False
+            return None
         except Exception as ex:
             print(f'Something failed: {ex.args}!')
-        finally:
-            return True
+            return None
 
 #--------------------------------------------------------------------------------------------------
 # Pure virtual methods that require implementation
