@@ -2,34 +2,50 @@
 import os
 import requests
 import subprocess
+from sys import platform
 
 from PyFCS import ColourSelection
 from PyFCS import Palette
 from PyFCS import DocumentBuilder
+
+# Versioning check
+from PyFCS import check_api_compatibility, get_backend_api_version
+FCS_PYTHON_API_VERSION = "22.11.1.11"
+if not check_api_compatibility(FCS_PYTHON_API_VERSION):
+    raise Exception(f"Incompatible backend API!\n"
+                   f"Please make sure that a major version of {get_backend_api_version()} is used.")
+
+# Global instance for not user or document bound operations
+global gb 
+from GeometryBuilder import GeometryBuilder
+gb = GeometryBuilder()
 
 class FCSViewer(object):
     """
     The primary interactor of the FCS web viewer.
     """
 
-    def __init__(self, viewer_pid: int, document_operator: DocumentBuilder):
+    def __init__(self, user_id: str='local'):
         """
         During instantiation connects to a viewer instance. 
         """
-        from sys import platform
 
-        self.viewer_id = viewer_pid
+        self.db = DocumentBuilder(gb.geom_engine)
+        self.gb = gb
+        self.viewer_id = 3000
+        # `user_id` can be set to 'local' for debugging and dev purposes,
+        # in production mode, this is filled in automatically
+        self.user_id = user_id 
         self.viewer_url = '127.0.0.1'
         self.viewer_request_url = f'http://{self.viewer_url}:{self.viewer_id}/toFrontend'
         self.platform = platform
         self.is_available = self.has_active_viewer()
         self.is_viewer_compatible = self.has_compatible_viewer()
         self.log_debug_information = False
-        self.document_operator = document_operator
         self.published_object_counter = 0
         self.nested_object_counter = 0
-        self.plugin_name = "FCSPythonProject"
-        self.active_document_name = self.document_operator.get_document_name()
+        self.plugin_name = f"{self.user_id}"
+        self.active_document_name = self.db.get_document_name()
         self.project_folder = self.__setup_temp_folder()
 
     def set_plugin_name(self, plugin_name: str, log_debug_information: bool=False) -> None:
@@ -48,7 +64,7 @@ class FCSViewer(object):
 
         default_model_path = f"{self.plugin_name}/{self.active_document_name}.cbf"
         self.active_document_name = model_name
-        self.document_operator.set_document_name(self.active_document_name)
+        self.db.set_document_name(self.active_document_name)
 
         if os.path.exists(default_model_path):
             os.replace(default_model_path, f"{self.plugin_name}/{self.active_document_name}.cbf")
@@ -122,8 +138,8 @@ class FCSViewer(object):
 
         model_path = f"{self.project_folder}/{self.active_document_name}.cbf"
 
-        if self.document_operator.save_document_to(self.project_folder):
-            self.document_operator.close_document()
+        if self.db.save_document_to(self.project_folder):
+            self.db.close_document()
 
         # STEP 2: SEND data to frontend
         msg_request = {
@@ -144,7 +160,7 @@ class FCSViewer(object):
         #ToDo: Implement this on client side
         return; 
 
-        _ = self.document_operator.set_object_visibility(entity_id, False)
+        _ = self.db.set_object_visibility(entity_id, False)
 
         msg_request = {
                 "operation": "hide",
@@ -163,12 +179,12 @@ class FCSViewer(object):
         #ToDo: Implement this on client side
         return; 
 
-        list_component_ids = self.document_operator.get_added_component_ids()
+        list_component_ids = self.db.get_added_component_ids()
 
         for component_id in list_component_ids:
-            _ = self.document_operator.set_object_visibility(component_id, True)
+            _ = self.db.set_object_visibility(component_id, True)
 
-        _ = self.document_operator.set_object_visibility(component_id, False)
+        _ = self.db.set_object_visibility(component_id, False)
 
         msg_request = {
             "operation": "hide_only",
@@ -188,10 +204,10 @@ class FCSViewer(object):
         #ToDo: Implement this on client side
         #return; 
 
-        list_component_ids = self.document_operator.get_added_component_ids()
+        list_component_ids = self.db.get_added_component_ids()
 
         for component_id in list_component_ids:
-            _ = self.document_operator.set_object_visibility(component_id, False)
+            _ = self.db.set_object_visibility(component_id, False)
 
         msg_request = {
                 "operation":"hide_all",
@@ -210,7 +226,7 @@ class FCSViewer(object):
         #ToDo: Implement this on client side
         return; 
 
-        _ = self.document_operator.set_object_visibility(entity_id, True)
+        _ = self.db.set_object_visibility(entity_id, True)
 
         msg_request = {
                 "operation": "show",
@@ -230,13 +246,13 @@ class FCSViewer(object):
         #ToDo: Implement this on client side
         return; 
 
-        list_component_ids = self.document_operator.get_added_component_ids()
+        list_component_ids = self.db.get_added_component_ids()
 
         for component_id in list_component_ids:
             if component_id == entity_id:
-                _ = self.document_operator.set_object_visibility(component_id, True)
+                _ = self.db.set_object_visibility(component_id, True)
             else:
-                _ = self.document_operator.set_object_visibility(component_id, False)
+                _ = self.db.set_object_visibility(component_id, False)
 
         msg_request = {
                 "operation": "show_only",
@@ -250,10 +266,10 @@ class FCSViewer(object):
         Displays all entities in the viewer.
         """
 
-        list_component_ids = self.document_operator.get_added_component_ids()
+        list_component_ids = self.db.get_added_component_ids()
 
         for component_id in list_component_ids:
-            _ = self.document_operator.set_object_visibility(component_id, True)
+            _ = self.db.set_object_visibility(component_id, True)
 
         msg_request = {
                 "operation": "show_all",
@@ -269,7 +285,7 @@ class FCSViewer(object):
 
         if entity_id == -1: return
 
-        _ = self.document_operator.set_object_opacity(entity_id, opacity)
+        _ = self.db.set_object_opacity(entity_id, opacity)
 
         msg_request = {
                 "operation": "set_transparency",
@@ -318,7 +334,7 @@ class FCSViewer(object):
         stl_path_static = f'{express_static_folder}/{export_stl_name}'
         try:
             export_to_path = self.project_folder
-            item_id = self.document_operator.add_to_document(entity, f"{object_order}_{name}", export_to_path)
+            item_id = self.db.add_to_document(entity, f"{object_order}_{name}", export_to_path)
         except Exception as ex:
             print(f"FCSViewer: Could not publish object named {name}. Failure: {ex.args}")
             return item_id
@@ -386,7 +402,7 @@ class FCSViewer(object):
         # return item_id; 
 
         try:
-            item_id = self.document_operator.add_new_container(name)
+            item_id = self.db.add_new_container(name)
         except Exception as ex:
             print(f"FCSViewer: Could not publish container named {name}. Failure: {ex.args}")
             return item_id
@@ -420,7 +436,7 @@ class FCSViewer(object):
         # return item_id; 
 
         try:
-            item_id = self.document_operator.add_new_container_under(name, parent_id)
+            item_id = self.db.add_new_container_under(name, parent_id)
         except Exception as ex:
             print(f"FCSViewer: Could not publish container named {name}. Failure: {ex.args}")
             return item_id
@@ -469,7 +485,7 @@ class FCSViewer(object):
         stl_path_static = f'{express_static_folder}/{export_stl_name}'
         try:
             export_to_path = self.project_folder
-            item_id = self.document_operator.add_to_document_under(entity, parent_entity_id, f"{object_order}_{name}", export_to_path)
+            item_id = self.db.add_to_document_under(entity, parent_entity_id, f"{object_order}_{name}", export_to_path)
         except Exception as ex:
             print(f"FCSViewer: Could not publish object named {name}. Failure: {ex.args}")
             return item_id
@@ -562,7 +578,7 @@ class FCSViewer(object):
         colour = Palette.get_specific_colour(red, green, blue)
 
         # Set colour
-        self.document_operator.set_object_colour(id, colour)
+        self.db.set_object_colour(id, colour)
 
         # Inform viewer
         msg_request = {
@@ -590,7 +606,7 @@ class FCSViewer(object):
         colour = Palette.get_colour(selected_colour)
 
         # Set colour
-        self.document_operator.set_object_colour(id, colour)        
+        self.db.set_object_colour(id, colour)        
 
         # SEND data to viewer
         msg_request = {
@@ -629,6 +645,7 @@ class FCSViewer(object):
 
         if not self.is_available: return {}
         
+        request['user_id'] = self.user_id
         try:
             response = requests.post(viewer_url, json=request)
             dict_result = dict(response)
