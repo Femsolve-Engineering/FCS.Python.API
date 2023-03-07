@@ -606,6 +606,17 @@ class FCSViewer(object):
 
         msg_response = self.__try_send_request(self.viewer_request_url, msg_request)
 
+    def send_data_to_viewer(self, data) -> None:
+
+        # SEND data to viewer
+        msg_request = {
+            "operation":"receive_data",
+            "arguments":{
+                "body" : data,
+                }
+            }
+
+        msg_response = self.__try_send_request(self.viewer_request_url, msg_request)
 
     def __try_send_request(self, viewer_url: str, request: dict) -> dict:
         """
