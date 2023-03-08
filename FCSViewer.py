@@ -25,13 +25,14 @@ class FCSViewer(object):
     The primary interactor of the FCS web viewer.
     """
 
-    def __init__(self, user_id: str='local'):
+    def __init__(self, user_id: str='local', logger: object=None):
         """
         During instantiation connects to a viewer instance. 
         """
 
         self.db = DocumentBuilder(gb.geom_engine)
         self.gb = gb
+        self.log = logger
         self.viewer_id = 3000
         # `user_id` can be set to 'local' for debugging and dev purposes,
         # in production mode, this is filled in automatically
@@ -86,7 +87,7 @@ class FCSViewer(object):
             is_running = is_port_in_use(self.viewer_id)
             return is_running                      
         except Exception as ex:
-            print(f"has_active_viewer failed: {ex}. Will assume no Viewer is connected!")
+            self.__log(f"has_active_viewer failed: {ex}. Will assume no Viewer is connected!")
             return False
 
     def has_compatible_viewer(self) -> bool:
@@ -104,7 +105,7 @@ class FCSViewer(object):
 
         viewer_version = response.text
         if not check_api_compatibility(viewer_version):
-            print(f"!!! Viewer instance version ({viewer_version}) is not compatible with current backend API version ({get_backend_api_version()})!!!")
+            self.__log(f"!!! Viewer instance version ({viewer_version}) is not compatible with current backend API version ({get_backend_api_version()})!!!")
             self.is_available = False
 
         return True
@@ -336,7 +337,7 @@ class FCSViewer(object):
             export_to_path = self.project_folder
             item_id = self.db.add_to_document(entity, f"{object_order}_{name}", export_to_path)
         except Exception as ex:
-            print(f"FCSViewer: Could not publish object named {name}. Failure: {ex.args}")
+            self.__log(f"FCSViewer: Could not publish object named {name}. Failure: {ex.args}")
             return item_id
 
         # STEP 2: SEND data to frontend
@@ -358,7 +359,7 @@ class FCSViewer(object):
         # ToDo: Increment only if response is correct
         self.published_object_counter += 1
         if self.log_debug_information:
-            print(f'FCSViewer DEBUG: Total number of published objects {self.published_object_counter}')
+            self.__log(f'FCSViewer DEBUG: Total number of published objects {self.published_object_counter}')
 
         return item_id
 
@@ -376,7 +377,7 @@ class FCSViewer(object):
             if len(removed_ids) == 0:
                 raise Exception('Empty array returned for removed objects!')
         except Exception as ex:
-            print(f'FCSViewer: Failed to remove {object_id}. Exception: {ex.args}')
+            self.__log(f'FCSViewer: Failed to remove {object_id}. Exception: {ex.args}')
             return
 
         msg_request = {
@@ -404,7 +405,7 @@ class FCSViewer(object):
         try:
             item_id = self.db.add_new_container(name)
         except Exception as ex:
-            print(f"FCSViewer: Could not publish container named {name}. Failure: {ex.args}")
+            self.__log(f"FCSViewer: Could not publish container named {name}. Failure: {ex.args}")
             return item_id
 
         msg_request = {
@@ -438,7 +439,7 @@ class FCSViewer(object):
         try:
             item_id = self.db.add_new_container_under(name, parent_id)
         except Exception as ex:
-            print(f"FCSViewer: Could not publish container named {name}. Failure: {ex.args}")
+            self.__log(f"FCSViewer: Could not publish container named {name}. Failure: {ex.args}")
             return item_id
 
         msg_request = {
@@ -465,7 +466,7 @@ class FCSViewer(object):
         """
 
         if self.log_debug_information:
-            print(f"FCSViewer DEBUG: Trying to add {name} under {parent_entity_id}.")
+            self.__log(f"FCSViewer DEBUG: Trying to add {name} under {parent_entity_id}.")
 
         if entity == None or parent_entity_id == -1 or name == "":
             raise Exception("Wrong input data provided for add_to_document_under!")
@@ -487,7 +488,7 @@ class FCSViewer(object):
             export_to_path = self.project_folder
             item_id = self.db.add_to_document_under(entity, parent_entity_id, f"{object_order}_{name}", export_to_path)
         except Exception as ex:
-            print(f"FCSViewer: Could not publish object named {name}. Failure: {ex.args}")
+            self.__log(f"FCSViewer: Could not publish object named {name}. Failure: {ex.args}")
             return item_id
 
         # STEP 2: SEND data to frontend
@@ -511,7 +512,7 @@ class FCSViewer(object):
         self.published_object_counter += 1
         self.nested_object_counter += 1
         if self.log_debug_information:
-            print(f'FCSViewer DEBUG: Published {self.nested_object_counter} nested objects. ({self.published_object_counter} in total)')
+            self.__log(f'FCSViewer DEBUG: Published {self.nested_object_counter} nested objects. ({self.published_object_counter} in total)')
 
         return item_id
 
@@ -573,7 +574,7 @@ class FCSViewer(object):
         """
         if id == -1: return
 
-        # print(f"Set colour to input : (ID) {id}, (R) {red}, (G) {green}, (B) {blue}")
+        # self.__log(f"Set colour to input : (ID) {id}, (R) {red}, (G) {green}, (B) {blue}")
         # Create paint 
         colour = Palette.get_specific_colour(red, green, blue)
 
@@ -656,6 +657,20 @@ class FCSViewer(object):
 
         return dict_result
 
+    def __log(self, message: str) -> None:
+        """
+        Logging method, if no logger is set, then simple print is used.
+        """
+        if self.log == None:
+            print(message)
+        else:
+            try:
+                self.log.log(message)
+            except Exception as ex:
+                print(f'Failed to use logger passed in (Exception: {ex.args}).\n Will use print statements instead.')
+                print(message)
+                self.log = None
+
     def __setup_temp_folder(self):
         """
         Creates a Femsolve Kft folder if it does not yet exist.
@@ -675,26 +690,26 @@ class FCSViewer(object):
 
             elif self.platform == "linux":
                 # ToDo: This would need to be in an environment file
-                str_tmp_path = f"{os.path.abspath(os.path.dirname(__file__))}/../../FCS.Cloud/LinuxAppData/{self.plugin_name}"
+                str_tmp_path = f"{os.path.abspath(os.path.dirname(__file__))}/../../LinuxAppData/{self.plugin_name}"
 
                 if not os.path.isdir(str_tmp_path):
                     os.mkdir(str_tmp_path)
-                    print(f"Created temporary folder for STEP exports : {str_tmp_path}!")
+                    self.__log(f"Created temporary folder for STEP exports : {str_tmp_path}!")
 
         except Exception as ex:
 
             if self.is_available: 
                 
-                print(f"Failed to create TEMP directories with an AVAILABLE viewer hooked up! Exception: {ex} \n")
+                self.__log(f"Failed to create TEMP directories with an AVAILABLE viewer hooked up! Exception: {ex} \n")
                 self.is_available = False
 
             else:
 
-                print (f"Failed to create TEMP directories. Exception: Exception: {ex} \n")
+                self.__log (f"Failed to create TEMP directories. Exception: Exception: {ex} \n")
         
         if not self.is_available:
 
-            print("\n !!! WARNING !!! Because no viewer is attached to external application there will not be any model files exported"
+            self.__log("\n !!! WARNING !!! Because no viewer is attached to external application there will not be any model files exported"
                    +" (and thus no temporary work path is setup). Note in Batch mode, unless the user manually saves the document"
                    +" no results will be saved! \n")
 
