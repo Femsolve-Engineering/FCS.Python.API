@@ -32,16 +32,22 @@ class BackendService(object):
         Returns true, if the command was found and run (even if it failed).
         Return false otherwise.
         """
+
+        log = self.fv.get_logger()
+        log.set_logging_context(self.app_guid)
+        result = None
+
         try:
             command_ptr = getattr(self, command_name)
             result = command_ptr(command_args)
-            return result
         except AttributeError:
-            print(f'Could not find {command_name}!')
-            return None
+            log.err(f'Could not find {command_name}!')
         except Exception as ex:
-            print(f'Something failed: {ex.args}!')
-            return None
+            log.err(f'Something failed: {ex.args}!')
+        finally: 
+            log.set_logging_context('')
+
+        return result
 
 #--------------------------------------------------------------------------------------------------
 # Pure virtual methods that require implementation
