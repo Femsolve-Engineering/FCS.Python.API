@@ -622,9 +622,27 @@ class FCSViewer(object):
 
         msg_response = self.__try_send_request(self.viewer_request_url, msg_request)
 
-    def send_data_to_viewer(self, data) -> None:
+    def show_message(self, message: str) -> None:
+        """Creates a pop-up window to the user.
 
-        # SEND data to viewer
+        Args:
+            message (str): The message to be shown in the pop-up window.
+        """
+
+        msg_request = {
+            "operation":"show_message_to_user",
+            "arguments":{
+                'message' : message
+                }
+        }
+
+        msg_response = self.__try_send_request(self.viewer_request_url, msg_request)
+
+    def send_data_to_viewer(self, data) -> None:
+        """
+        Sends custom data to viewer.
+        """
+
         msg_request = {
             "operation":"receive_data",
             "arguments":{
