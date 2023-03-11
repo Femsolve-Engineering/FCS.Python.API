@@ -26,28 +26,30 @@ class FCSViewer(object):
     The primary interactor of the FCS web viewer.
     """
 
-    def __init__(self, user_id: str='local'):
+    def __init__(self, user_id: str='local', logger: FCSLogger=None):
         """
         During instantiation connects to a viewer instance. 
         """
 
-        self.db = DocumentBuilder(gb.geom_engine)
-        self.gb = gb
-        self.log: FCSLogger = self.__setup_logging()
-        self.viewer_id = 3000
         # `user_id` can be set to 'local' for debugging and dev purposes,
         # in production mode, this is filled in automatically
         self.user_id = user_id 
+        self.platform = platform
+        self.document_builder = DocumentBuilder(gb.geom_engine)
+        self.geometry_builder = gb
+        self.viewer_id = 3000
         self.viewer_url = '127.0.0.1'
         self.viewer_request_url = f'http://{self.viewer_url}:{self.viewer_id}/toFrontend'
-        self.platform = platform
         self.is_available = self.has_active_viewer()
         self.is_viewer_compatible = self.has_compatible_viewer()
+        self.working_directory = self.__setup_working_directory()
+        if logger == None:
+            self.log: FCSLogger = self.__setup_logging()
+        else: self.log = logger
         self.log_debug_information = False
         self.published_object_counter = 0
         self.nested_object_counter = 0
-        self.active_document_name = self.db.get_document_name()
-        self.working_directory = self.__setup_working_directory()
+        self.active_document_name = self.document_builder.get_document_name()
 
     def get_logger(self) -> FCSLogger:
         """Getter for logger object
@@ -65,7 +67,7 @@ class FCSViewer(object):
 
         default_model_path = f"{self.user_id}/{self.active_document_name}.cbf"
         self.active_document_name = model_name
-        self.db.set_document_name(self.active_document_name)
+        self.document_builder.set_document_name(self.active_document_name)
 
         if os.path.exists(default_model_path):
             os.replace(default_model_path, f"{self.user_id}/{self.active_document_name}.cbf")
@@ -136,8 +138,8 @@ class FCSViewer(object):
 
         model_path = f"{self.working_directory}/{self.active_document_name}.cbf"
 
-        if self.db.save_document_to(self.working_directory):
-            self.db.close_document()
+        if self.document_builder.save_document_to(self.working_directory):
+            self.document_builder.close_document()
 
         # STEP 2: SEND data to frontend
         msg_request = {
@@ -158,7 +160,7 @@ class FCSViewer(object):
         #ToDo: Implement this on client side
         return; 
 
-        _ = self.db.set_object_visibility(entity_id, False)
+        _ = self.document_builder.set_object_visibility(entity_id, False)
 
         msg_request = {
                 "operation": "hide",
@@ -177,12 +179,12 @@ class FCSViewer(object):
         #ToDo: Implement this on client side
         return; 
 
-        list_component_ids = self.db.get_added_component_ids()
+        list_component_ids = self.document_builder.get_added_component_ids()
 
         for component_id in list_component_ids:
-            _ = self.db.set_object_visibility(component_id, True)
+            _ = self.document_builder.set_object_visibility(component_id, True)
 
-        _ = self.db.set_object_visibility(component_id, False)
+        _ = self.document_builder.set_object_visibility(component_id, False)
 
         msg_request = {
             "operation": "hide_only",
@@ -202,10 +204,10 @@ class FCSViewer(object):
         #ToDo: Implement this on client side
         #return; 
 
-        list_component_ids = self.db.get_added_component_ids()
+        list_component_ids = self.document_builder.get_added_component_ids()
 
         for component_id in list_component_ids:
-            _ = self.db.set_object_visibility(component_id, False)
+            _ = self.document_builder.set_object_visibility(component_id, False)
 
         msg_request = {
                 "operation":"hide_all",
@@ -224,7 +226,7 @@ class FCSViewer(object):
         #ToDo: Implement this on client side
         return; 
 
-        _ = self.db.set_object_visibility(entity_id, True)
+        _ = self.document_builder.set_object_visibility(entity_id, True)
 
         msg_request = {
                 "operation": "show",
@@ -244,13 +246,13 @@ class FCSViewer(object):
         #ToDo: Implement this on client side
         return; 
 
-        list_component_ids = self.db.get_added_component_ids()
+        list_component_ids = self.document_builder.get_added_component_ids()
 
         for component_id in list_component_ids:
             if component_id == entity_id:
-                _ = self.db.set_object_visibility(component_id, True)
+                _ = self.document_builder.set_object_visibility(component_id, True)
             else:
-                _ = self.db.set_object_visibility(component_id, False)
+                _ = self.document_builder.set_object_visibility(component_id, False)
 
         msg_request = {
                 "operation": "show_only",
@@ -264,10 +266,10 @@ class FCSViewer(object):
         Displays all entities in the viewer.
         """
 
-        list_component_ids = self.db.get_added_component_ids()
+        list_component_ids = self.document_builder.get_added_component_ids()
 
         for component_id in list_component_ids:
-            _ = self.db.set_object_visibility(component_id, True)
+            _ = self.document_builder.set_object_visibility(component_id, True)
 
         msg_request = {
                 "operation": "show_all",
@@ -283,7 +285,7 @@ class FCSViewer(object):
 
         if entity_id == -1: return
 
-        _ = self.db.set_object_opacity(entity_id, opacity)
+        _ = self.document_builder.set_object_opacity(entity_id, opacity)
 
         msg_request = {
                 "operation": "set_transparency",
@@ -332,7 +334,7 @@ class FCSViewer(object):
         stl_path_static = f'{express_static_folder}/{export_stl_name}'
         try:
             export_to_path = self.working_directory
-            item_id = self.db.add_to_document(entity, f"{object_order}_{name}", export_to_path)
+            item_id = self.document_builder.add_to_document(entity, f"{object_order}_{name}", export_to_path)
         except Exception as ex:
             self.__log(f"FCSViewer: Could not publish object named {name}. Failure: {ex.args}")
             return item_id
@@ -370,7 +372,7 @@ class FCSViewer(object):
         if object_id == -1: return
         
         try:
-            removed_ids = self.db.remove_from_document(object_id)
+            removed_ids = self.document_builder.remove_from_document(object_id)
             if len(removed_ids) == 0:
                 raise Exception('Empty array returned for removed objects!')
         except Exception as ex:
@@ -400,7 +402,7 @@ class FCSViewer(object):
         # return item_id; 
 
         try:
-            item_id = self.db.add_new_container(name)
+            item_id = self.document_builder.add_new_container(name)
         except Exception as ex:
             self.__log(f"FCSViewer: Could not publish container named {name}. Failure: {ex.args}")
             return item_id
@@ -434,7 +436,7 @@ class FCSViewer(object):
         # return item_id; 
 
         try:
-            item_id = self.db.add_new_container_under(name, parent_id)
+            item_id = self.document_builder.add_new_container_under(name, parent_id)
         except Exception as ex:
             self.__log(f"FCSViewer: Could not publish container named {name}. Failure: {ex.args}")
             return item_id
@@ -483,7 +485,7 @@ class FCSViewer(object):
         stl_path_static = f'{express_static_folder}/{export_stl_name}'
         try:
             export_to_path = self.working_directory
-            item_id = self.db.add_to_document_under(entity, parent_entity_id, f"{object_order}_{name}", export_to_path)
+            item_id = self.document_builder.add_to_document_under(entity, parent_entity_id, f"{object_order}_{name}", export_to_path)
         except Exception as ex:
             self.__log(f"FCSViewer: Could not publish object named {name}. Failure: {ex.args}")
             return item_id
@@ -576,7 +578,7 @@ class FCSViewer(object):
         colour = Palette.get_specific_colour(red, green, blue)
 
         # Set colour
-        self.db.set_object_colour(id, colour)
+        self.document_builder.set_object_colour(id, colour)
 
         # Inform viewer
         msg_request = {
@@ -604,7 +606,7 @@ class FCSViewer(object):
         colour = Palette.get_colour(selected_colour)
 
         # Set colour
-        self.db.set_object_colour(id, colour)        
+        self.document_builder.set_object_colour(id, colour)        
 
         # SEND data to viewer
         msg_request = {
@@ -654,19 +656,6 @@ class FCSViewer(object):
 
         return dict_result
 
-    def __log(self, message: str) -> None:
-        """
-        Logging method, if no logger is set, then simple print is used.
-        """
-        if self.log == None:
-            print(message)
-        else:
-            try:
-                self.log.log(message)
-            except Exception as ex:
-                print(f'Failed to use logger passed in (Exception: {ex.args}).\n Will use print statements instead.')
-                print(message)
-                self.log = None
 
     def __setup_working_directory(self):
         """
@@ -691,22 +680,22 @@ class FCSViewer(object):
 
                 if not os.path.isdir(str_tmp_path):
                     os.mkdir(str_tmp_path)
-                    self.__log(f"Created temporary folder for exports : {str_tmp_path}!")
+                    print(f"Created temporary folder for exports : {str_tmp_path}!")
 
         except Exception as ex:
 
             if self.is_available: 
                 
-                self.__log(f"Failed to create TEMP directories with an AVAILABLE viewer hooked up! Exception: {ex} \n")
+                print(f"Failed to create TEMP directories with an AVAILABLE viewer hooked up! Exception: {ex} \n")
                 self.is_available = False
 
             else:
 
-                self.__log(f"Failed to create TEMP directories. Exception: {ex} \n")
+                print(f"Failed to create TEMP directories. Exception: {ex} \n")
         
         if not self.is_available:
 
-            self.__log("\n !!! WARNING !!! Because no viewer is attached to external application there will not be any model files exported"
+            print("\n !!! WARNING !!! Because no viewer is attached to external application there will not be any model files exported"
                    +" (and thus no temporary work path is setup). Note in Batch mode, unless the user manually saves the document"
                    +" no results will be saved! \n")
 
@@ -720,7 +709,7 @@ class FCSViewer(object):
             object: Object responsible for logging.
         """
 
-        timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
-        path_to_log_file = os.path.join(f'{self.user_id}_{timestamp}')
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        path_to_log_file = os.path.join(self.working_directory, f'{self.user_id}_{timestamp}.log')
         return FCSLogger(self.user_id, path_to_log_file)
 

@@ -25,7 +25,7 @@ class BackendService(object):
         # ToDo: Set session services
         self.gb = gb # Only need a single instance right now
         self.fv = fcs_viewer
-        self.db = self.fv.db
+        self.db = self.fv.document_builder
 
     def run_command(self, command_name: str, command_args: dict={}) -> dict:
         """

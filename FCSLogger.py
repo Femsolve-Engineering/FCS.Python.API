@@ -1,6 +1,8 @@
 
 import logging
 import os
+from sys import platform
+import datetime
 
 class FCSLogger:
     """
@@ -56,3 +58,30 @@ class FCSLogger:
         failed or created unexpected results.
         """
         self.logger.critical(message)
+
+def create_generic_logger(name_of_logger: str) -> FCSLogger:
+    """This type of logging is not user bound.
+
+    Returns:
+        FCSLogger: logging class
+    """
+
+    str_tmp_path = ''
+    if platform == "win32":
+        str_app_data = os.getenv('APPDATA')
+        str_tmp_path = os.path.join(str_app_data, "Femsolve Kft")
+
+        if not os.path.isdir(str_tmp_path):
+            os.mkdir(str_tmp_path)
+
+    elif platform == "linux":
+        # ToDo?: This would need to be in an environment file
+        str_tmp_path = os.path.join(os.path.abspath(os.path.dirname(__file__)),"/../../LinuxAppData/")  
+
+        if not os.path.isdir(str_tmp_path):
+            os.mkdir(str_tmp_path)
+
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    path_to_log_file = os.path.join(str_tmp_path, f'{name_of_logger}_{timestamp}.log')
+    return FCSLogger(name_of_logger, path_to_log_file)
+
