@@ -2,6 +2,9 @@
 import os
 import requests
 import datetime
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 from sys import platform
 
 from FCSLogger import FCSLogger
