@@ -38,7 +38,7 @@ class FCSViewer(object):
         # in production mode, this is filled in automatically
         self.user_id = user_id 
         self.viewer_url = '127.0.0.1'
-        self.viewer_request_url = f'http://{self.viewer_url}:{self.viewer_id}/toFrontend'
+        self.viewer_request_url = f'https://{self.viewer_url}:{self.viewer_id}/toFrontend'
         self.platform = platform
         self.is_available = self.has_active_viewer()
         self.is_viewer_compatible = self.has_compatible_viewer()
@@ -101,7 +101,7 @@ class FCSViewer(object):
 
         if not self.is_available: return False
 
-        response = requests.get(f"http://{self.viewer_url}:{self.viewer_id}/version")
+        response = requests.get(f"https://{self.viewer_url}:{self.viewer_id}/version", verify=False)
 
         viewer_version = response.text
         if not check_api_compatibility(viewer_version):
@@ -648,7 +648,7 @@ class FCSViewer(object):
         
         request['user_id'] = self.user_id
         try:
-            response = requests.post(viewer_url, json=request)
+            response = requests.post(viewer_url, json=request, verify=False)
             dict_result = dict(response)
         except:
             dict_result = {
