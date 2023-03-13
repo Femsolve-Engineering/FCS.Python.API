@@ -40,8 +40,8 @@ class BackendService(object):
         try:
             command_ptr = getattr(self, command_name)
             result = command_ptr(command_args)
-        except AttributeError:
-            log.err(f'Could not find {command_name}!')
+        except AttributeError as ex_atrr:
+            log.err(f'Probably could not find {command_name}! (Exception: {ex_atrr.args})')
         except Exception as ex:
             log.err(f'Something failed: {ex.args}!')
         finally: 
