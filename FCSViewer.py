@@ -694,7 +694,8 @@ class FCSViewer(object):
 
             elif self.platform == "linux":
                 # ToDo: This would need to be in an environment file
-                str_tmp_path = os.path.join(os.path.abspath(os.path.dirname(__file__)),"/../../LinuxAppData/", self.user_id)  
+                # str_tmp_path = os.path.join(os.path.abspath(os.path.dirname(__file__)),"/../../LinuxAppData/", self.user_id)
+                str_tmp_path = f'/home/tamas/Development/FemsolveCloudServices/LinuxAppData/{self.user_id}/'
 
                 if not os.path.isdir(str_tmp_path):
                     os.mkdir(str_tmp_path)
