@@ -371,8 +371,6 @@ class FCSViewer(object):
         All components that were removed from the document
         need to be updated. The removed_ids must contain the passed in ID itself.
         """
-
-        if object_id == -1: return
         
         try:
             removed_ids = self.document_builder.remove_from_document(object_id)
@@ -382,15 +380,78 @@ class FCSViewer(object):
             self.__log(f'FCSViewer: Failed to remove {object_id}. Exception: {ex.args}')
             return
 
+        removed_all_ids = []
+
+        removed_all_ids.extend(removed_ids)
+
         msg_request = {
-            "operation":"add_to_document",
-            "arguments":{
-                "removed_ids" : str(removed_ids)
-                }
+            "operation": 'remove_from_document',
+            "arguments": {
+                "removedUIDs" : removed_all_ids,
+                },
             }
 
         msg_response = self.__try_send_request(self.viewer_request_url, msg_request)
-        return
+
+    def translate_vector(self, object_id: int):
+        """
+        Eltol egy vektor altal megadott iranyba a vektor hosszanak mertekevel
+        """
+        pass
+
+    def translate_vector_distance(self, object_id: int, vector_xyz: list, distance: float):
+        """
+        Eltol egy vektor altal megadott iranyba, a megadott tavolsag mertekevel
+        """
+
+        # Get object by id
+        object = self.document_builder.get_geom_object_by_id(object_id)
+
+        # Create vector object
+        dx = vector_xyz[0]
+        dy = vector_xyz[1]
+        dz = vector_xyz[2]
+
+        vector = self.geometry_builder.make_vector(dx, dy, dz)
+
+        self.geometry_builder.translate_vector_distance(object, vector, distance, False)
+
+        msg_request = {
+            "operation": 'translate_vector_distance',
+            "arguments": {
+                "objectUID" : object_id,
+                "vector_xyz" : vector_xyz,
+                "distance" : distance,
+                "copy" : False,
+                },
+            }
+
+        msg_response = self.__try_send_request(self.viewer_request_url, msg_request)
+        
+
+    def translate_two_points(self, object_id: int):
+        """
+        Eltol ket pont altal meghatarozott iranyba, a pontok kozti tavolsag metekevel
+        """
+        pass
+
+    def translate_dx_dy_dz(self, object_id: int):
+        """
+        Eltol dx, dy, dz vektorkomponensek alapjan
+        """
+        pass
+
+    def rotate_axis(self):
+        """
+        Egy tengely korul forgat
+        """
+        pass
+
+    def position_shape(self):
+        """
+        Forgat es eltol egy kiindulo- es egy cel LCS alapjan
+        """
+        pass
 
     def add_new_container(self, name: str) -> int:
         """
