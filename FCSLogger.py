@@ -19,10 +19,13 @@ class FCSLogger:
         self.stream_handler.setFormatter(formatter)
         self.logger.addHandler(self.stream_handler)
 
-        self.file_handler = logging.FileHandler(self.path_to_log_file)
-        self.file_handler.setLevel(logging.INFO)
-        self.file_handler.setFormatter(formatter)
-        self.logger.addHandler(self.file_handler)
+        try:
+            self.file_handler = logging.FileHandler(self.path_to_log_file)
+            self.file_handler.setLevel(logging.INFO)
+            self.file_handler.setFormatter(formatter)
+            self.logger.addHandler(self.file_handler)
+        except Exception as ex:
+            self.wrn(f"Failed to add FileHandler that should write out logs to {self.path_to_log_file}. Reason: {ex.args}")
 
     def set_logging_context(self, context_name: str) -> None:
         """The logging may refer to a custom addin. If so, we want to indicate that these logging messages
