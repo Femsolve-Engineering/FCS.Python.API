@@ -665,7 +665,9 @@ class FCSViewer(object):
         #    "status": "NoViewerInstance"
         #    }
 
-        if not self.is_available: return {}
+        if not self.is_available: return {
+            "status" : True
+            }
         
         request['user_id'] = self.user_id
         try:
