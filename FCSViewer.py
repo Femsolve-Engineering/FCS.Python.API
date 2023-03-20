@@ -92,7 +92,7 @@ class FCSViewer(object):
             is_running = is_port_in_use(self.viewer_id)
             return is_running                      
         except Exception as ex:
-            self.__log(f"has_active_viewer failed: {ex}. Will assume no Viewer is connected!")
+            self.log.err(f"has_active_viewer failed: {ex}. Will assume no Viewer is connected!")
             return False
 
     def has_compatible_viewer(self) -> bool:
@@ -107,7 +107,7 @@ class FCSViewer(object):
 
         viewer_version = response.text
         if not check_api_compatibility(viewer_version):
-            self.__log(f"!!! Viewer instance version ({viewer_version}) is not compatible with current backend API version ({get_backend_api_version()})!!!")
+            self.log.err(f"!!! Viewer instance version ({viewer_version}) is not compatible with current backend API version ({get_backend_api_version()})!!!")
             self.is_available = False
 
         return True
@@ -339,7 +339,7 @@ class FCSViewer(object):
             export_to_path = self.working_directory
             item_id = self.document_builder.add_to_document(entity, f"{object_order}_{name}", export_to_path)
         except Exception as ex:
-            self.__log(f"FCSViewer: Could not publish object named {name}. Failure: {ex.args}")
+            self.log.err(f"FCSViewer: Could not publish object named {name}. Failure: {ex.args}")
             return item_id
 
         # STEP 2: SEND data to frontend
@@ -361,7 +361,7 @@ class FCSViewer(object):
         # ToDo: Increment only if response is correct
         self.published_object_counter += 1
         if self.log_debug_information:
-            self.__log(f'FCSViewer DEBUG: Total number of published objects {self.published_object_counter}')
+            self.log.dbg(f'FCSViewer DEBUG: Total number of published objects {self.published_object_counter}')
 
         return item_id
 
@@ -373,11 +373,12 @@ class FCSViewer(object):
         """
         
         try:
+            self.log.dbg(f'FCSViewer: Will try and remove {object_id}...')
             removed_ids = self.document_builder.remove_from_document(object_id)
             if len(removed_ids) == 0:
-                raise Exception('Empty array returned for removed objects!')
+                self.log.wrn(f'FCSViewer: Did not remove {object_id} because it seems it is no longer in the document.')
         except Exception as ex:
-            self.__log(f'FCSViewer: Failed to remove {object_id}. Exception: {ex.args}')
+            self.log.err(f'FCSViewer: Failed to remove {object_id}. Exception: {ex.args}')
             return
 
         removed_all_ids = []
@@ -468,7 +469,7 @@ class FCSViewer(object):
         try:
             item_id = self.document_builder.add_new_container(name)
         except Exception as ex:
-            self.__log(f"FCSViewer: Could not publish container named {name}. Failure: {ex.args}")
+            self.log.err(f"FCSViewer: Could not publish container named {name}. Failure: {ex.args}")
             return item_id
 
         msg_request = {
@@ -502,7 +503,7 @@ class FCSViewer(object):
         try:
             item_id = self.document_builder.add_new_container_under(name, parent_id)
         except Exception as ex:
-            self.__log(f"FCSViewer: Could not publish container named {name}. Failure: {ex.args}")
+            self.log.err(f"FCSViewer: Could not publish container named {name}. Failure: {ex.args}")
             return item_id
 
         msg_request = {
@@ -529,7 +530,7 @@ class FCSViewer(object):
         """
 
         if self.log_debug_information:
-            self.__log(f"FCSViewer DEBUG: Trying to add {name} under {parent_entity_id}.")
+            self.log.dbg(f"FCSViewer DEBUG: Trying to add {name} under {parent_entity_id}.")
 
         if entity == None or parent_entity_id == -1 or name == "":
             raise Exception("Wrong input data provided for add_to_document_under!")
@@ -551,7 +552,7 @@ class FCSViewer(object):
             export_to_path = self.working_directory
             item_id = self.document_builder.add_to_document_under(entity, parent_entity_id, f"{object_order}_{name}", export_to_path)
         except Exception as ex:
-            self.__log(f"FCSViewer: Could not publish object named {name}. Failure: {ex.args}")
+            self.log.err(f"FCSViewer: Could not publish object named {name}. Failure: {ex.args}")
             return item_id
 
         # STEP 2: SEND data to frontend
@@ -575,7 +576,7 @@ class FCSViewer(object):
         self.published_object_counter += 1
         self.nested_object_counter += 1
         if self.log_debug_information:
-            self.__log(f'FCSViewer DEBUG: Published {self.nested_object_counter} nested objects. ({self.published_object_counter} in total)')
+            self.log.dbg(f'FCSViewer DEBUG: Published {self.nested_object_counter} nested objects. ({self.published_object_counter} in total)')
 
         return item_id
 
@@ -633,7 +634,7 @@ class FCSViewer(object):
         Colours object in viewer. 
         Input are RGB integers between 0 to 255.
 
-        Legacy functionality: `SALOMEDS.SetColor(i_Face, list_RGB))`
+        Legacy functionality: `SALOMEDS.SetColor(i_Face, list_RGB)`
         """
         if id == -1: return
 
@@ -725,7 +726,9 @@ class FCSViewer(object):
         #    "status": "NoViewerInstance"
         #    }
 
-        if not self.is_available: return {}
+        if not self.is_available: return {
+            "status" : True
+            }
         
         request['user_id'] = self.user_id
         try:
@@ -758,7 +761,8 @@ class FCSViewer(object):
 
             elif self.platform == "linux":
                 # ToDo: This would need to be in an environment file
-                str_tmp_path = os.path.join(os.path.abspath(os.path.dirname(__file__)),"/../../LinuxAppData/", self.user_id)  
+                # str_tmp_path = os.path.join(os.path.abspath(os.path.dirname(__file__)),"/../../LinuxAppData/", self.user_id)
+                str_tmp_path = f'/home/tamas/Development/FemsolveCloudServices/LinuxAppData/{self.user_id}/'
 
                 if not os.path.isdir(str_tmp_path):
                     os.mkdir(str_tmp_path)
