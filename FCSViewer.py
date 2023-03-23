@@ -420,7 +420,7 @@ class FCSViewer(object):
         msg_request = {
             "operation": 'translate_vector_distance',
             "arguments": {
-                "objectUID" : object_id,
+                "objectUIDs" : [object_id],
                 "vector_xyz" : vector_xyz,
                 "distance" : distance,
                 "copy" : False,
@@ -429,14 +429,47 @@ class FCSViewer(object):
 
         msg_response = self.__try_send_request(self.viewer_request_url, msg_request)
         
-
-    def translate_two_points(self, object_id: int):
+    def translate_two_points(self, object1_id: int, object2_id: int, object3_id: int):
         """
         Eltol ket pont altal meghatarozott iranyba, a pontok kozti tavolsag metekevel
-        """
-        pass
 
-    def translate_dx_dy_dz(self, object_id: int):
+        arg1: objectumok (most csak faces), amiken az eltolast vegezzuk
+        arg2: pont1
+        arg2: pont2
+
+        Todo: az object1_id-nak egy listanak kellene lennie, ami id-kat tartalmaz
+        """
+
+        # Find geom objects based on the two IDs
+        g_obj1 = self.document_builder.get_geom_object_by_id(object1_id)
+        g_obj2 = self.document_builder.get_geom_object_by_id(object2_id)
+        g_obj3 = self.document_builder.get_geom_object_by_id(object3_id)
+
+        # Translate the model and send response to the viewer
+        obj = self.geometry_builder.translate_two_points(g_obj1, g_obj2, g_obj3)
+
+        # Calculate vector of translation
+        point2_xyz = self.geometry_builder.get_position(g_obj2)
+        point3_xyz = self.geometry_builder.get_position(g_obj3)
+
+        dx = point3_xyz[0] - point2_xyz[0]
+        dy = point3_xyz[1] - point2_xyz[1]
+        dz = point3_xyz[2] - point2_xyz[2]
+
+        vector_xyz = [dx, dy, dz]
+
+        msg_request = {
+            "operation": 'translate_two_points',
+            "arguments": {
+                "entityUIDs" : [object1_id], # Egy listat ad vissza a kijelolt entity-k (items, face, edges, vertices) UID-jaival
+                "vector_xyz" : vector_xyz,
+                "copy" : False,
+                },
+            }
+
+        msg_response = self.__try_send_request(self.viewer_request_url, msg_request)
+
+    def translate_dx_dy_dz(self):
         """
         Eltol dx, dy, dz vektorkomponensek alapjan
         """
