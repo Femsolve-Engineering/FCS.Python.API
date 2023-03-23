@@ -157,18 +157,18 @@ class FCSViewer(object):
 
     def hide(self, entity_id: int) -> None:
         """
-        Hides a single item in the viewer.
+        Hides items in the viewer.
         """
-
-        #ToDo: Implement this on client side
-        return; 
 
         _ = self.document_builder.set_object_visibility(entity_id, False)
 
+        entity_ids = []
+        entity_ids.append(entity_id)
+
         msg_request = {
-                "operation": "hide",
+                "operation":"hide",
                 "arguments":{
-                    "entity_id": entity_id
+                    "entity_ids": entity_ids
                     }
             }
 
@@ -203,9 +203,6 @@ class FCSViewer(object):
         Hides everything in the active document             
         Legacy functionality: `salome.sg.EraseAll()`
         """
-
-        #ToDo: Implement this on client side
-        #return; 
 
         list_component_ids = self.document_builder.get_added_component_ids()
 
@@ -318,7 +315,7 @@ class FCSViewer(object):
         is_ok = self.__try_send_request(self.viewer_request_url, msg_request)["status"]
 
 
-    def add_to_document(self, entity: object, name: str) -> int:
+    def add_to_document(self, entity: object, name: str, visible = False) -> int:
         """
         Adds a brand new top-level component.
         Legacy functionality: `salome.sg.addToStudy(model, name)`
@@ -362,6 +359,11 @@ class FCSViewer(object):
         self.published_object_counter += 1
         if self.log_debug_information:
             self.log.dbg(f'FCSViewer DEBUG: Total number of published objects {self.published_object_counter}')
+
+
+    # Set visibility
+        if not visible:
+            self.hide(item_id)
 
         return item_id
 
@@ -556,7 +558,7 @@ class FCSViewer(object):
         return item_id
 
 
-    def add_to_document_under(self, entity: object, parent_entity_id: int, name: str) -> int:
+    def add_to_document_under(self, entity: object, parent_entity_id: int, name: str, visible = False) -> int:
         """
         Adds entity under a parent entity               
         Legacy functionality: `geompy.addToStudyInFather( self.Model, i_Face, str_Name )`
@@ -610,6 +612,10 @@ class FCSViewer(object):
         self.nested_object_counter += 1
         if self.log_debug_information:
             self.log.dbg(f'FCSViewer DEBUG: Published {self.nested_object_counter} nested objects. ({self.published_object_counter} in total)')
+
+        # Set visibility
+        if not visible:
+            self.hide(item_id)
 
         return item_id
 
