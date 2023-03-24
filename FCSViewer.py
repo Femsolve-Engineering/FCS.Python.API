@@ -315,11 +315,13 @@ class FCSViewer(object):
         is_ok = self.__try_send_request(self.viewer_request_url, msg_request)["status"]
 
 
-    def add_to_document(self, entity: object, name: str, visible = False) -> int:
+    def add_to_document(self, entity: object, name: str, isVisible: bool = True) -> int:
         """
         Adds a brand new top-level component.
         Legacy functionality: `salome.sg.addToStudy(model, name)`
         """
+
+        # isVisible = False
 
         # Object order is not the same as the ID!
         object_order = self.published_object_counter + 1
@@ -344,6 +346,7 @@ class FCSViewer(object):
             "operation":"add_to_document",
             "arguments":{
                 "name" : name,
+                "isVisible": isVisible,
                 "item_id" : str(item_id),
                 "t2g_file" : export_t2g_name,
                 "stl_file" : export_stl_name,
@@ -361,8 +364,8 @@ class FCSViewer(object):
             self.log.dbg(f'FCSViewer DEBUG: Total number of published objects {self.published_object_counter}')
 
 
-    # Set visibility
-        if not visible:
+        # Set visibility
+        if not isVisible:
             self.hide(item_id)
 
         return item_id
@@ -558,11 +561,13 @@ class FCSViewer(object):
         return item_id
 
 
-    def add_to_document_under(self, entity: object, parent_entity_id: int, name: str, visible = False) -> int:
+    def add_to_document_under(self, entity: object, parent_entity_id: int, name: str, isVisible: bool) -> int:
         """
         Adds entity under a parent entity               
         Legacy functionality: `geompy.addToStudyInFather( self.Model, i_Face, str_Name )`
         """
+
+        # isVisible = False
 
         if self.log_debug_information:
             self.log.dbg(f"FCSViewer DEBUG: Trying to add {name} under {parent_entity_id}.")
@@ -595,6 +600,7 @@ class FCSViewer(object):
             "operation":"add_to_document_under",
             "arguments":{
                 "name" : name,
+                "isVisible": isVisible,
                 "item_id" : str(item_id),
                 "parent_id":str(parent_entity_id),
                 "t2g_file" : export_t2g_name,
@@ -614,7 +620,7 @@ class FCSViewer(object):
             self.log.dbg(f'FCSViewer DEBUG: Published {self.nested_object_counter} nested objects. ({self.published_object_counter} in total)')
 
         # Set visibility
-        if not visible:
+        if not isVisible:
             self.hide(item_id)
 
         return item_id
