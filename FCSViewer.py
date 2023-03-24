@@ -561,7 +561,7 @@ class FCSViewer(object):
         return item_id
 
 
-    def add_to_document_under(self, entity: object, parent_entity_id: int, name: str, isVisible: bool) -> int:
+    def add_to_document_under(self, entity: object, parent_entity_id: int, name: str, isVisible: bool = True) -> int:
         """
         Adds entity under a parent entity               
         Legacy functionality: `geompy.addToStudyInFather( self.Model, i_Face, str_Name )`
