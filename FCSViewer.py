@@ -1,6 +1,7 @@
 
 import os
 import requests
+import math
 import datetime
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -420,9 +421,9 @@ class FCSViewer(object):
         self.geometry_builder.translate_vector_distance(object, vector, distance, False)
 
         msg_request = {
-            "operation": 'translate_vector_distance',
+            "operation": 'translate_two_points',
             "arguments": {
-                "objectUIDs" : [object_id],
+                "entityUIDs" : [object_id],
                 "vector_xyz" : vector_xyz,
                 "distance" : distance,
                 "copy" : False,
@@ -458,13 +459,18 @@ class FCSViewer(object):
         dy = point3_xyz[1] - point2_xyz[1]
         dz = point3_xyz[2] - point2_xyz[2]
 
-        vector_xyz = [dx, dy, dz]
+        distance = math.sqrt(dx**2 + dy**2 + dz**2) 
+        if distance < 1e-9:
+            self.log.wrn(f'Tried to offset entity {object1_id} by a zero distance! Translation will be omitted.')
+            return
+        vector_xyz = [dx/distance, dy/distance, dz/distance]
 
         msg_request = {
             "operation": 'translate_two_points',
             "arguments": {
                 "entityUIDs" : [object1_id], # Egy listat ad vissza a kijelolt entity-k (items, face, edges, vertices) UID-jaival
                 "vector_xyz" : vector_xyz,
+                "distance" : distance,
                 "copy" : False,
                 },
             }
@@ -558,13 +564,11 @@ class FCSViewer(object):
         return item_id
 
 
-    def add_to_document_under(self, entity: object, parent_entity_id: int, name: str, isVisible: bool = True) -> int:
+    def add_to_document_under(self, entity: object, parent_entity_id: int, name: str, isVisible: bool = False) -> int:
         """
         Adds entity under a parent entity               
         Legacy functionality: `geompy.addToStudyInFather( self.Model, i_Face, str_Name )`
         """
-
-        # isVisible = False
 
         if self.log_debug_information:
             self.log.dbg(f"FCSViewer DEBUG: Trying to add {name} under {parent_entity_id}.")
