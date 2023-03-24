@@ -303,11 +303,8 @@ class FCSViewer(object):
         Legacy functionality: `salome.sg.FitAll()`
         """
 
-        #ToDo: Implement this on client side
-        return; 
-
         msg_request = {
-                "operation":"fit_all",
+                "operation":"fit_view",
                 "arguments":{
                     }
             }
