@@ -298,14 +298,14 @@ class FCSViewer(object):
 
         is_ok = self.__try_send_request(self.viewer_request_url, msg_request)["status"]
 
-    def fit_all(self) -> None:
+    def center_view(self) -> None:
         """
         Adjust camera that all is visible               
         Legacy functionality: `salome.sg.FitAll()`
         """
 
         msg_request = {
-                "operation":"fit_view",
+                "operation":"center_view",
                 "arguments":{
                     }
             }
