@@ -12,6 +12,7 @@ from FCSLogger import FCSLogger
 from PyFCS import ColourSelection
 from PyFCS import Palette
 from PyFCS import DocumentBuilder
+from PyFCS import GEOM_Object
 
 # Versioning check
 from PyFCS import check_api_compatibility, get_backend_api_version
@@ -411,40 +412,38 @@ class FCSViewer(object):
 
         msg_response = self.__try_send_request(self.viewer_request_url, msg_request)
 
-    def translate_vector(self, object_id: int):
+    def translate_vector(self, object_id: int, vector_xyz: list) -> GEOM_Object:
         """
-        Eltol egy vektor altal megadott iranyba a vektor hosszanak mertekevel
-        """
-        pass
-
-    def translate_vector_distance(self, object_id: int, vector_xyz: list, distance: float):
-        """
-        Eltol egy vektor altal megadott iranyba, a megadott tavolsag mertekevel
+        Eltol egy vektor altal megadott iranyba es a vektor meretevel
         """
 
         # Get object by id
-        object = self.document_builder.get_geom_object_by_id(object_id)
+        geom_object = self.document_builder.get_geom_object_by_id(object_id)
 
         # Create vector object
         dx = vector_xyz[0]
         dy = vector_xyz[1]
         dz = vector_xyz[2]
-
-        vector = self.geometry_builder.make_vector(dx, dy, dz)
-
-        self.geometry_builder.translate_vector_distance(object, vector, distance, False)
+        vector_length = math.sqrt(dx**2 + dy**2 + dz**2) 
+        if vector_length < 1e-9:
+            self.log.wrn(f'Tried to offset entity {object_id} by a zero distance! Translation will be omitted.')
+            return
+        
+        norm_vector_xyz = [dx/vector_length, dy/vector_length, dz/vector_length]
+        geom_norm_vector_xyz = self.geometry_builder.make_vector(dx, dy, dz)
+        geom_object = self.geometry_builder.translate_vector_distance(geom_object, geom_norm_vector_xyz, vector_length, False)
 
         msg_request = {
             "operation": 'translate_two_points',
             "arguments": {
                 "entityUIDs" : [object_id],
-                "vector_xyz" : vector_xyz,
-                "distance" : distance,
+                "vector_xyz" : [dx, dy, dz],
                 "copy" : False,
                 },
             }
 
         msg_response = self.__try_send_request(self.viewer_request_url, msg_request)
+        return geom_object
         
     def translate_two_points(self, object1_id: int, object2_id: int, object3_id: int):
         """
@@ -472,12 +471,6 @@ class FCSViewer(object):
         dx = point3_xyz[0] - point2_xyz[0]
         dy = point3_xyz[1] - point2_xyz[1]
         dz = point3_xyz[2] - point2_xyz[2]
-
-        # distance = math.sqrt(dx**2 + dy**2 + dz**2) 
-        # if distance < 1e-9:
-        #     self.log.wrn(f'Tried to offset entity {object1_id} by a zero distance! Translation will be omitted.')
-        #     return
-        # vector_xyz = [dx/distance, dy/distance, dz/distance]
         vector_xyz = [dx, dy, dz]
 
         msg_request = {
@@ -485,7 +478,6 @@ class FCSViewer(object):
             "arguments": {
                 "entityUIDs" : [object1_id], # Egy listat ad vissza a kijelolt entity-k (items, face, edges, vertices) UID-jaival
                 "vector_xyz" : vector_xyz,
-                # "distance" : distance,
                 "copy" : False,
                 },
             }
