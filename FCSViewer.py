@@ -459,18 +459,19 @@ class FCSViewer(object):
         dy = point3_xyz[1] - point2_xyz[1]
         dz = point3_xyz[2] - point2_xyz[2]
 
-        distance = math.sqrt(dx**2 + dy**2 + dz**2) 
-        if distance < 1e-9:
-            self.log.wrn(f'Tried to offset entity {object1_id} by a zero distance! Translation will be omitted.')
-            return
-        vector_xyz = [dx/distance, dy/distance, dz/distance]
+        # distance = math.sqrt(dx**2 + dy**2 + dz**2) 
+        # if distance < 1e-9:
+        #     self.log.wrn(f'Tried to offset entity {object1_id} by a zero distance! Translation will be omitted.')
+        #     return
+        # vector_xyz = [dx/distance, dy/distance, dz/distance]
+        vector_xyz = [dx, dy, dz]
 
         msg_request = {
             "operation": 'translate_two_points',
             "arguments": {
                 "entityUIDs" : [object1_id], # Egy listat ad vissza a kijelolt entity-k (items, face, edges, vertices) UID-jaival
                 "vector_xyz" : vector_xyz,
-                "distance" : distance,
+                # "distance" : distance,
                 "copy" : False,
                 },
             }
