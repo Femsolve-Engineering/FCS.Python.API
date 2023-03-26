@@ -312,6 +312,20 @@ class FCSViewer(object):
 
         is_ok = self.__try_send_request(self.viewer_request_url, msg_request)["status"]
 
+    def refresh_viewer(self) -> bool:
+        """
+        By default, the viewer is not rendering any added/removed/modified components,
+        unless we are operating on views (view centering, camera position, etc.)
+        """
+
+        msg_request = {
+            "operation" : "refresh_viewer",
+            "arguments" : {
+            }
+        }
+
+        is_ok = self.__try_send_request(self.viewer_request_url, msg_request)["status"]
+        return is_ok
 
     def add_to_document(self, entity: object, name: str, isVisible: bool = True) -> int:
         """
