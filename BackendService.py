@@ -37,6 +37,10 @@ class BackendService(object):
         log.set_logging_context(self.app_guid)
         result = None
 
+        if command_name not in self.get_available_callbacks():
+            log.wrn(f'Request a command name that was not made available: {command_name}.')
+            return {'Error' : f'Command name unavailable {command_name}'}
+
         try:
             command_ptr = getattr(self, command_name)
             result = command_ptr(command_args)
@@ -53,7 +57,7 @@ class BackendService(object):
 # Pure virtual methods that require implementation
 #--------------------------------------------------------------------------------------------------
 
-    def get_available_callbacks(self) -> list:
+    def get_available_callbacks(self, args: dict=None) -> list:
         """
         List of available callbacks to be forwarded to the listeners of the cloud application.
         """
