@@ -94,7 +94,7 @@ class FCSViewer(object):
             is_running = is_port_in_use(self.viewer_id)
             return is_running                      
         except Exception as ex:
-            self.log.err(f"has_active_viewer failed: {ex}. Will assume no Viewer is connected!")
+            print(f"has_active_viewer failed: {ex}. Will assume no Viewer is connected!")
             return False
 
     def has_compatible_viewer(self) -> bool:
@@ -109,7 +109,7 @@ class FCSViewer(object):
 
         viewer_version = response.text
         if not check_api_compatibility(viewer_version):
-            self.log.err(f"!!! Viewer instance version ({viewer_version}) is not compatible with current backend API version ({get_backend_api_version()})!!!")
+            print(f"!!! Viewer instance version ({viewer_version}) is not compatible with current backend API version ({get_backend_api_version()})!!!")
             self.is_available = False
 
         return True
