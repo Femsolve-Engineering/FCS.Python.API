@@ -78,8 +78,7 @@ def create_generic_logger(name_of_logger: str) -> FCSLogger:
             os.mkdir(str_tmp_path)
 
     elif platform == "linux":
-        # ToDo?: This would need to be in an environment file
-        str_tmp_path = os.path.join(os.path.abspath(os.path.dirname(__file__)),"/../../LinuxAppData/")  
+        str_tmp_path = f"{os.path.dirname(__file__)}/../../LinuxAppData/"  
 
         if not os.path.isdir(str_tmp_path):
             os.mkdir(str_tmp_path)
