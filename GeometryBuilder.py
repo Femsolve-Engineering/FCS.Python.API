@@ -407,7 +407,22 @@ class GeometryBuilder(object):
     """
     Methods for Boolean Operations
     """
-    def make_boolean(self, the_shape1: GEOM_Object, the_shape2: GEOM_Object, the_op: int, is_check_self_inte: bool) -> GEOM_Object:
+    def make_boolean(self, the_shape1: GEOM_Object, the_shape2: GEOM_Object, the_op: int, is_check_self_inte: bool=False) -> GEOM_Object:
+        """Boolean operation between any two shapes
+
+        Args:
+            the_shape1 (GEOM_Object): first shape
+            the_shape2 (GEOM_Object): second shape
+            the_op (int): 
+                1 - Common
+                2 - Cut
+                3 - Fuse
+                4 - Section
+            is_check_self_inte (bool): check for self intersection?
+
+        Returns:
+            GEOM_Object: Boolean result
+        """
         return self.boolean_operations.make_boolean(the_shape1, the_shape2, the_op, is_check_self_inte)
 
     def make_section(self, the_shape1: GEOM_Object, the_shape2: GEOM_Object, is_check_self_intersection=False) -> GEOM_Object:
