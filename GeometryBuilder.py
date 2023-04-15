@@ -32,6 +32,7 @@ from PyFCS import GeometryTransformOperations
 from PyFCS import ExtGeometryShapeOperations
 from PyFCS import ExtGeometryMeasureOperations
 from PyFCS import ExtGeometryBooleanOperations
+from PyFCS import ExtGeometry3DPrimitives
 
 # IO Handling
 from PyFCS import ExportOperations
@@ -79,6 +80,7 @@ class GeometryBuilder(object):
         self.ext_shape_operations = ExtGeometryShapeOperations(self.shape_operations)
         self.ext_measure_operations = ExtGeometryMeasureOperations(self.measure_operations)
         self.ext_boolean_operations = ExtGeometryBooleanOperations(self.boolean_operations)
+        self.ext_geometry_primitives = ExtGeometry3DPrimitives(self.geometry_primitives)
 
         # Instantiate generic operators
         self.export_operations = ExportOperations(self.geom_engine)
@@ -221,7 +223,7 @@ class GeometryBuilder(object):
         return self.geometry_primitives.make_pipe_shells_without_path( the_bases, the_locations, is_generate_groups)
 
     def make_pipe_bi_normal_along_vector(self,  the_base: GEOM_Object, the_path: GEOM_Object, the_vec: GEOM_Object, is_generate_groups: bool) -> TColStd_HSequenceOfTransient:
-        return self.geometry_primitives.make_pipe_bi_normal_along_vector( the_base, the_path, the_vec, is_generate_groups)
+        return self.ext_geometry_primitives.make_pipe_bi_normal_along_vector( the_base, the_path, the_vec, is_generate_groups)
 
     def make_thickening(self,  the_object: GEOM_Object, the_offset: float, the_faces_ids: list, is_copy: bool, the_inside = False) -> GEOM_Object:
         return self.geometry_primitives.make_thickening( the_object, the_faces_ids, the_offset, is_copy, the_inside)
@@ -684,7 +686,7 @@ class GeometryBuilder(object):
         return self.local_operations.make_fillet2_d(the_shape, the_r, the_vertices)
 
     def make_fillet_1d(self, the_shape: GEOM_Object, the_r: float, the_vertices: list, do_ignore_secant_vertices = True) -> GEOM_Object:
-        return self.local_operations.make_fillet1_d(the_shape, the_r, the_vertexes, do_ignore_secant_vertices)
+        return self.local_operations.make_fillet1_d(the_shape, the_r, the_vertices, do_ignore_secant_vertices)
 
     def make_chamfer_all(self, the_shape: GEOM_Object, the_d: float) -> GEOM_Object:
         return self.local_operations.make_chamfer_all(the_shape, the_d)
