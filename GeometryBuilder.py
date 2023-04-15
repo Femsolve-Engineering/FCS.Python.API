@@ -1,4 +1,6 @@
 
+from typing import List
+
 # Data types
 from PyFCS import GEOM_Object
 from PyFCS import GEOMImpl_Gen
@@ -222,7 +224,7 @@ class GeometryBuilder(object):
     def make_pipe_shells_without_path(self,  the_bases: TColStd_HSequenceOfTransient, the_locations: TColStd_HSequenceOfTransient, is_generate_groups: bool) -> TColStd_HSequenceOfTransient:
         return self.geometry_primitives.make_pipe_shells_without_path( the_bases, the_locations, is_generate_groups)
 
-    def make_pipe_bi_normal_along_vector(self,  the_base: GEOM_Object, the_path: GEOM_Object, the_vec: GEOM_Object, is_generate_groups: bool) -> TColStd_HSequenceOfTransient:
+    def make_pipe_bi_normal_along_vector(self,  the_base: GEOM_Object, the_path: GEOM_Object, the_vec: GEOM_Object, is_generate_groups: bool) -> List[GEOM_Object]:
         return self.ext_geometry_primitives.make_pipe_bi_normal_along_vector( the_base, the_path, the_vec, is_generate_groups)
 
     def make_thickening(self,  the_object: GEOM_Object, the_offset: float, the_faces_ids: list, is_copy: bool, the_inside = False) -> GEOM_Object:
