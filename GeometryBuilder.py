@@ -1,5 +1,6 @@
 
 from typing import List
+from typing import Tuple
 
 # Data types
 from PyFCS import GEOM_Object
@@ -560,9 +561,13 @@ class GeometryBuilder(object):
     def fuse_collinear_edges_within_wire(self, the_wire: GEOM_Object, the_vertices: list) -> GEOM_Object:
         return self.healing_operations.fuse_collinear_edges_within_wire(the_wire, the_vertices)
 
-    def get_free_boundary(self, the_object: GEOM_Object) -> List[GEOM_Object]:
+    def get_free_boundary(self, the_object: GEOM_Object) -> Tuple[List[GEOM_Object],List[GEOM_Object]]:
         """
-        Returns a list of wires were 'holes' are located.
+        Returns a list of wires were 'holes' are located. 
+        The first member of the tuple is the list of open wires,
+        the second one is a the list of closed wires.
+
+        If the calculation was unsuccessful OR there are no open and closed wires, then an empty tuple is returned.
         """
         return self.ext_healing_operations.get_free_boundary(the_object)
 
