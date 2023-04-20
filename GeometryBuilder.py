@@ -35,6 +35,7 @@ from PyFCS import ExtGeometryShapeOperations
 from PyFCS import ExtGeometryMeasureOperations
 from PyFCS import ExtGeometryBooleanOperations
 from PyFCS import ExtGeometry3DPrimitives
+from PyFCS import ExtGeometryHealingOperations
 
 # IO Handling
 from PyFCS import ExportOperations
@@ -83,6 +84,7 @@ class GeometryBuilder(object):
         self.ext_measure_operations = ExtGeometryMeasureOperations(self.measure_operations)
         self.ext_boolean_operations = ExtGeometryBooleanOperations(self.boolean_operations)
         self.ext_geometry_primitives = ExtGeometry3DPrimitives(self.geometry_primitives)
+        self.ext_healing_operations = ExtGeometryHealingOperations(self.healing_operations)
 
         # Instantiate generic operators
         self.export_operations = ExportOperations(self.geom_engine)
@@ -536,13 +538,17 @@ class GeometryBuilder(object):
     def remove_int_wires(self, the_object: GEOM_Object, the_wires: list) -> GEOM_Object:
         return self.healing_operations.remove_int_wires(the_object, the_wires)
 
-    def fill_holes(self, the_object: GEOM_Object, the_wires: list) -> GEOM_Object:
-        return self.healing_operations.fill_holes(the_object, the_wires)
+    def fill_holes(self, the_object: GEOM_Object) -> GEOM_Object:
+        """
+        Original method required to pass in indices of wires, this method currently
+        will just by defaul fill in all holes it finds.
+        """
+        return self.ext_healing_operations.fill_holes(the_object)
 
     def sew(self, the_object: list, the_tolerance: float, is_allow_non_manifold=False) -> GEOM_Object:
         return self.healing_operations.sew(the_object, the_tolerance, is_allow_non_manifold)
 
-    def remove_internal_faces(self, the_solids: list) -> GEOM_Object:
+    def remove_internal_faces(self, the_solids: List[GEOM_Object]) -> GEOM_Object:
         return self.healing_operations.remove_internal_faces(the_solids)
 
     def divide_edge(self, the_object: GEOM_Object, the_index: int, the_value: float, is_by_parameter: bool) -> GEOM_Object:
@@ -554,8 +560,11 @@ class GeometryBuilder(object):
     def fuse_collinear_edges_within_wire(self, the_wire: GEOM_Object, the_vertices: list) -> GEOM_Object:
         return self.healing_operations.fuse_collinear_edges_within_wire(the_wire, the_vertices)
 
-    def get_free_boundary(self, the_objects: TColStd_HSequenceOfTransient, the_out_closed_wires: TColStd_HSequenceOfTransient, the_out_open_wires: TColStd_HSequenceOfTransient) -> bool:
-        return self.healing_operations.get_free_boundary(the_objects, the_out_closed_wires, the_out_open_wires)
+    def get_free_boundary(self, the_object: GEOM_Object) -> List[GEOM_Object]:
+        """
+        Returns a list of wires were 'holes' are located.
+        """
+        return self.ext_healing_operations.get_free_boundary(the_object)
 
     def change_orientation(self, the_object: GEOM_Object) -> GEOM_Object:
         return self.healing_operations.change_orientation(the_object)

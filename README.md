@@ -2,6 +2,9 @@
 Provides Python methods bound to high-performance libraries for fast delivery of engineering applications.
 
 ## Version Log
+- 23.4.7.2   - Adaptation to HealingOperations ('get_free_boundary', 'fill_holes')
+- 23.4.7.1   - Adaptation to 'make_pipe_bi_normal_along_vector'
+- 23.4.7.0   - Backend services added
 - 22.11.1.12 - Added container item methods for grouping objects
 - 22.11.1.11 - Import STEP by hierarchy method added
 - 22.11.1.10 - Added STL size estimation methods, exporting STLs with set size possible
