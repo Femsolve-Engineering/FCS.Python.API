@@ -4,6 +4,8 @@ import requests
 import math
 import datetime
 import urllib3
+
+from FCSOptions import ProcessExitStatus
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 from sys import platform
@@ -64,7 +66,6 @@ class FCSViewer(object):
         """
         return self.log
 
-
     def set_model_name(self, model_name: str) -> None:
         """
         Renames the workspace binary. Do not include extension!
@@ -76,7 +77,6 @@ class FCSViewer(object):
 
         if os.path.exists(default_model_path):
             os.replace(default_model_path, f"{self.user_id}/{self.active_document_name}.cbf")
-
 
     def has_active_viewer(self) -> bool:
         """
@@ -114,6 +114,63 @@ class FCSViewer(object):
 
         return True
 
+    def show_progress_tracker(self, progress_percentage: float, current_process_name: str) -> None:
+        """
+        Can be used to communicate to the user the progress of a backend process.
+
+        Args:
+            progress_percentage (float): Has to be a value between 0 and 100. If is outside
+                of these bounds an exception is thrown!
+            current_process_name (str): Need to name the process that's running, or provide 
+                some description otherwise it will throw an error
+        """
+
+        if progress_percentage < 0 or progress_percentage > 100:
+            error_msg = f'Progress percentage ({progress_percentage}) is out of bounds!'
+            self.log.err(error_msg)
+            raise Exception(error_msg)
+        
+        if current_process_name == None or len(current_process_name.strip()) == 0:
+            error_msg = f'Need to name the process!'
+            self.log.err(error_msg)
+            raise Exception(error_msg)
+        
+        msg_request = {
+            "operation":"show_progress_tracker",
+            "arguments":{
+                "progress_percentage" : progress_percentage,
+                "current_process_name" : current_process_name,
+                }
+            }
+
+        _ = self.__try_send_request(self.viewer_request_url, msg_request)
+
+    def finish_progress_tracker(self, exit_status: ProcessExitStatus=ProcessExitStatus.Successful, exit_message: str='Operation Completed!', immediate_shutdown=False) -> None:
+        """
+        This will finish the progress tracking.
+
+        Args:
+            exit_status (bool, optional): Based on the exit status the dialog will change slightly in style.
+            exit_message (str, optional): What should be shown to the user when the process finished. Defaults to 'Operation Completed!'.
+            immediate_shutdown (bool, optional): If set to true, the progress tracker will immediately disappear. Defaults to False.
+        """
+
+        # Need to validate the correct optional status was passed in.
+        if not ProcessExitStatus.is_valid_status(exit_status):
+            error_msg = f'You need to pass in a valid exit status for the process!'
+            self.log.err(error_msg)
+            raise Exception(error_msg)
+
+        msg_request = {
+            "operation":"finish_progress_tracker",
+            "arguments":{
+                "exit_status" : exit_status,
+                "exit_message" : exit_message,
+                "immediate_shutdown" : immediate_shutdown
+                }
+            }
+
+        _ = self.__try_send_request(self.viewer_request_url, msg_request)
 
     def update_viewer(self) -> None:
         """
@@ -775,18 +832,17 @@ class FCSViewer(object):
         Private method to try forward request to cloud viewer.
         """
 
-        #dict_result = {
-        #    "status": "NoViewerInstance"
-        #    }
-
         if not self.is_available: return {
             "status" : True
             }
         
         request['user_id'] = self.user_id
+        dict_result: dict = None
         try:
             response = requests.post(viewer_url, json=request, verify=False)
-            dict_result = dict(response)
+            dict_result = {
+                "status" : True
+            }
         except:
             dict_result = {
                 "status": False
