@@ -114,7 +114,7 @@ class FCSViewer(object):
 
         return True
 
-    def show_progress_tracker(self, progress_percentage: float, current_process_name: str) -> None:
+    def show_progress_tracker(self, progress_percentage: float, current_process_name: str, process_bundle_title: str='') -> None:
         """
         Can be used to communicate to the user the progress of a backend process.
 
@@ -123,6 +123,9 @@ class FCSViewer(object):
                 of these bounds an exception is thrown!
             current_process_name (str): Need to name the process that's running, or provide 
                 some description otherwise it will throw an error
+            process_bundle_title (str, optional): This will override the title of the dialog,
+                by default its empty and is not overridden.
+
         """
 
         if progress_percentage < 0 or progress_percentage > 100:
@@ -140,6 +143,7 @@ class FCSViewer(object):
             "arguments":{
                 "progress_percentage" : progress_percentage,
                 "current_process_name" : current_process_name,
+                "process_bundle_title" : process_bundle_title
                 }
             }
 
