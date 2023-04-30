@@ -4,8 +4,8 @@ class StatusMessageType(enum.Enum):
     """
     Simple flags for status messages.
     """
-    InfoStatus = 3,
-    WarningStatus = 4,
+    InfoStatus = 3
+    WarningStatus = 4
     FailureStatus = 5
 
 class ProcessExitStatus(enum.Enum):
@@ -13,8 +13,8 @@ class ProcessExitStatus(enum.Enum):
     Encompasses possible exit statuses for a process.
     """
 
-    Successful = 0,
-    Warning = 1,
+    Successful = 0 
+    Warning = 1
     Failure = 2
 
     @staticmethod
