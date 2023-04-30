@@ -6,6 +6,7 @@ import datetime
 import urllib3
 
 from FCSOptions import ProcessExitStatus
+from FCSOptions import StatusMessageType
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 from sys import platform
@@ -175,6 +176,27 @@ class FCSViewer(object):
             }
 
         _ = self.__try_send_request(self.viewer_request_url, msg_request)
+
+    def show_status_message(self, message_type: StatusMessageType, message: str) -> None:
+        """
+        Propagates an info, warning, or error message to the frontend client.
+        """
+
+        if message_type not in StatusMessageType:
+            error_msg = f'You need to pass in a valid status message for the process!'
+            self.log.err(error_msg)
+            raise Exception(error_msg)
+
+        msg_request = {
+            "operation":"show_status_message",
+            "arguments":{
+                "message_status" : message_type.value,
+                "message" : message
+                }
+            }
+
+        _ = self.__try_send_request(self.viewer_request_url, msg_request)
+
 
     def update_viewer(self) -> None:
         """

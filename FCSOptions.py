@@ -1,5 +1,13 @@
 import enum
 
+class StatusMessageType(enum.Enum):
+    """
+    Simple flags for status messages.
+    """
+    InfoStatus = 3,
+    WarningStatus = 4,
+    FailureStatus = 5
+
 class ProcessExitStatus(enum.Enum):
     """
     Encompasses possible exit statuses for a process.
