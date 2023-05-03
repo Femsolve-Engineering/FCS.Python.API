@@ -19,7 +19,7 @@ from PyFCS import GEOM_Object
 
 # Versioning check
 from PyFCS import check_api_compatibility, get_backend_api_version
-FCS_PYTHON_API_VERSION = "23.4.7.4"
+FCS_PYTHON_API_VERSION = "23.4.7.5"
 if not check_api_compatibility(FCS_PYTHON_API_VERSION):
     raise Exception(f"Incompatible backend API!\n"
                    f"Please make sure that a major version of {get_backend_api_version()} is used.")
@@ -411,13 +411,16 @@ class FCSViewer(object):
         is_ok = self.__try_send_request(self.viewer_request_url, msg_request)["status"]
         return is_ok
 
-    def add_to_document(self, entity: object, name: str, isVisible: bool = True) -> int:
+    def add_to_document(self, entity: GEOM_Object, name: str, isVisible: bool = True) -> int:
         """
         Adds a brand new top-level component.
         Legacy functionality: `salome.sg.addToStudy(model, name)`
         """
 
-        # isVisible = False
+        if entity.is_null():
+            error_msg = f'FCSViewer: Cannot add `{name}` to document because its geometry representation is null!'
+            self.log.err(error_msg)
+            raise Exception(error_msg)
 
         # Object order is not the same as the ID!
         object_order = self.published_object_counter + 1
