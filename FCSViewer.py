@@ -233,7 +233,6 @@ class FCSViewer(object):
         msg_request = {
             "operation":"commit_to_document",
             "arguments":{
-                "fname" : "commit_to_document",
                 "model_path" : model_path,
                 }
             }
@@ -768,7 +767,7 @@ class FCSViewer(object):
         return -1
 
 
-    def set_specific_object_colour(self, id: int, red: int, green: int, blue: int) -> None:
+    def set_specific_object_color(self, id: int, red: int, green: int, blue: int) -> None:
         """
         Colours object in viewer. 
         Input are RGB integers between 0 to 255.
@@ -779,26 +778,25 @@ class FCSViewer(object):
 
         # self.__log(f"Set colour to input : (ID) {id}, (R) {red}, (G) {green}, (B) {blue}")
         # Create paint 
-        colour = Palette.get_specific_colour(red, green, blue)
+        color = Palette.get_specific_colour(red, green, blue)
 
-        # Set colour
-        self.document_builder.set_object_colour(id, colour)
+        # Set color
+        self.document_builder.set_object_colour(id, color)
 
         # Inform viewer
         msg_request = {
-            "operation":"set_object_colour",
+            "operation":"set_object_color",
             "arguments":{
-                "fname" : "colorModel",
                 "item_id" : str(id),
-                "red": colour.R,
-                "green" : colour.G,
-                "blue" : colour.B
+                "red": color.R,
+                "green" : color.G,
+                "blue" : color.B
                 }
             }
 
         msg_response = self.__try_send_request(self.viewer_request_url, msg_request)
 
-    def set_object_colour(self, id: int, selected_colour: ColourSelection) -> None:
+    def set_object_color(self, id: int, selected_color: ColourSelection) -> None:
         """
         Colours object in viewer.
 
@@ -807,20 +805,19 @@ class FCSViewer(object):
         if id == -1: return
 
         # Create paint
-        colour = Palette.get_colour(selected_colour)
+        color = Palette.get_colour(selected_color)
 
         # Set colour
-        self.document_builder.set_object_colour(id, colour)        
+        self.document_builder.set_object_colour(id, color)        
 
         # SEND data to viewer
         msg_request = {
-            "operation":"set_object_colour",
+            "operation":"set_object_color",
             "arguments":{
-                "fname" : "colorModel",
                 "item_id" : str(id),
-                "red": colour.R,
-                "green" : colour.G,
-                "blue" : colour.B
+                "red": color.R,
+                "green" : color.G,
+                "blue" : color.B
                 }
             }
 
