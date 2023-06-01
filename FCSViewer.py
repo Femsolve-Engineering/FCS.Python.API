@@ -19,7 +19,7 @@ from PyFCS import GEOM_Object
 
 # Versioning check
 from PyFCS import check_api_compatibility, get_backend_api_version
-FCS_PYTHON_API_VERSION = "23.4.7.5"
+FCS_PYTHON_API_VERSION = "23.4.7.6"
 if not check_api_compatibility(FCS_PYTHON_API_VERSION):
     raise Exception(f"Incompatible backend API!\n"
                    f"Please make sure that a major version of {get_backend_api_version()} is used.")
@@ -47,7 +47,7 @@ class FCSViewer(object):
         self.geometry_builder = gb
         self.viewer_id = 3000
         self.viewer_url = '127.0.0.1'
-        self.viewer_request_url = f'https://{self.viewer_url}:{self.viewer_id}/toFrontend'
+        self.viewer_request_url = f'http://{self.viewer_url}:{self.viewer_id}/toFrontend'
         self.is_available = self.has_active_viewer()
         self.is_viewer_compatible = self.has_compatible_viewer()
         self.working_directory = self.__setup_working_directory()
@@ -106,7 +106,7 @@ class FCSViewer(object):
 
         if not self.is_available: return False
 
-        response = requests.get(f"https://{self.viewer_url}:{self.viewer_id}/version", verify=False)
+        response = requests.get(f"http://{self.viewer_url}:{self.viewer_id}/version", verify=False)
 
         viewer_version = response.text
         if not check_api_compatibility(viewer_version):
