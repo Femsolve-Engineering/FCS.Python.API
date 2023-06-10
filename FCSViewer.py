@@ -19,7 +19,7 @@ from PyFCS import GEOM_Object
 
 # Versioning check
 from PyFCS import check_api_compatibility, get_backend_api_version
-FCS_PYTHON_API_VERSION = "23.4.7.6"
+FCS_PYTHON_API_VERSION = "23.4.7.7"
 if not check_api_compatibility(FCS_PYTHON_API_VERSION):
     raise Exception(f"Incompatible backend API!\n"
                    f"Please make sure that a major version of {get_backend_api_version()} is used.")
@@ -214,6 +214,27 @@ class FCSViewer(object):
             }
 
         is_ok = self.__try_send_request(self.viewer_request_url, msg_request)["status"]
+
+    def clear_document(self) -> bool:
+        """Clears the document and discards all entities in it.
+
+        Returns:
+            bool: If the document clearing was successful.
+        """
+
+        if not self.document_builder.clear_document():
+            self.log.err('Failed to clear document!')
+            return False
+
+        # STEP 2: SEND data to frontend
+        msg_request = {
+            "operation":"clear_document",
+            "arguments":{
+                }
+            }
+
+        is_ok = self.__try_send_request(self.viewer_request_url, msg_request)
+        return is_ok
 
     def commit_to_document(self) -> None:
         """
