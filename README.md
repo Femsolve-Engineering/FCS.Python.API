@@ -2,6 +2,7 @@
 Provides Python methods bound to high-performance libraries for fast delivery of engineering applications.
 
 ## Version Log
+- 23.4.7.3   - Added 'is_null' method to check if shape exists
 - 23.4.7.2   - Adaptation to HealingOperations ('get_free_boundary', 'fill_holes')
 - 23.4.7.1   - Adaptation to 'make_pipe_bi_normal_along_vector'
 - 23.4.7.0   - Backend services added
