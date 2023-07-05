@@ -2,7 +2,8 @@
 Provides Python methods bound to high-performance libraries for fast delivery of engineering applications.
 
 ## Version Log
-- 23.4.7.3   - Added 'is_null' method to check if shape exists
+- 23.4.7.8   - Added 'is_shape_null' to check if the shape stored in the GEOM object it not null (result of failed import/operations)
+- 23.4.7.3   - Added 'is_null' method to check if GEOM object is not null (result of invalid operation)
 - 23.4.7.2   - Adaptation to HealingOperations ('get_free_boundary', 'fill_holes')
 - 23.4.7.1   - Adaptation to 'make_pipe_bi_normal_along_vector'
 - 23.4.7.0   - Backend services added
