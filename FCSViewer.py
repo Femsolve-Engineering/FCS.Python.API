@@ -1,5 +1,7 @@
 
+import io
 import os
+import json
 import requests
 import math
 import datetime
@@ -474,18 +476,20 @@ class FCSViewer(object):
                 "t2g_path_static" : t2g_path_static
                 }
             }
+        
+        # Collect full paths to written out asset files
+        t2g_file_fullpath = os.path.join(self.working_directory, export_t2g_name)
+        stl_file_fullpath = os.path.join(self.working_directory, export_stl_name)
 
-        msg_response = self.__try_send_request(self.viewer_request_url, msg_request)
+        msg_response = self.__try_send_request_with_files(
+            self.viewer_request_url, 
+            msg_request,
+            [t2g_file_fullpath, stl_file_fullpath])
 
         # ToDo: Increment only if response is correct
         self.published_object_counter += 1
         if self.log_debug_information:
             self.log.dbg(f'FCSViewer DEBUG: Total number of published objects {self.published_object_counter}')
-
-
-        # Set visibility
-        if not isVisible:
-            self.hide(item_id)
 
         return item_id
 
@@ -725,7 +729,14 @@ class FCSViewer(object):
                 }
             }
 
-        msg_response = self.__try_send_request(self.viewer_request_url, msg_request)
+        # Collect full paths to written out asset files
+        t2g_file_fullpath = os.path.join(self.working_directory, export_t2g_name)
+        stl_file_fullpath = os.path.join(self.working_directory, export_stl_name)
+
+        msg_response = self.__try_send_request_with_files(
+            self.viewer_request_url, 
+            msg_request,
+            [t2g_file_fullpath, stl_file_fullpath])
 
         # ToDo: Increment only if response is correct
         self.published_object_counter += 1
@@ -886,7 +897,8 @@ class FCSViewer(object):
         request['user_id'] = self.user_id
         dict_result: dict = None
         try:
-            response = requests.post(viewer_url, json=request, verify=False)
+            headers = {'Content-type': 'application/json'}
+            response = requests.post(viewer_url, json=request, headers=headers, verify=False)
             dict_result = {
                 "status" : True
             }
@@ -894,6 +906,41 @@ class FCSViewer(object):
             dict_result = {
                 "status": False
                 }
+
+        return dict_result
+
+
+    def __try_send_request_with_files(self, viewer_url: str, request: dict, file_paths: list) -> dict:
+        """
+        Private method to try forward request to cloud viewer WITH files.
+        """
+
+        if not self.is_available: return {
+            "status" : True
+        }
+
+        request['user_id'] = self.user_id
+        dict_result: dict = None
+        try:
+            # Define the multipart/form-data payload
+            files = []
+            for i, file_path in enumerate(file_paths):
+                with open(file_path, 'rb') as f:
+                    file_data = f.read()
+                files.append((f'file{i}', (file_path, io.BytesIO(file_data))))
+
+            data = {'message': json.dumps(request)}
+            
+            # Send the POST request
+            response = requests.post(viewer_url, files=files, data=data, verify=False)
+            
+            dict_result = {
+                "status" : True
+            }
+        except:
+            dict_result = {
+                "status": False
+            }
 
         return dict_result
 
