@@ -745,8 +745,8 @@ class FCSViewer(object):
             self.log.dbg(f'FCSViewer DEBUG: Published {self.nested_object_counter} nested objects. ({self.published_object_counter} in total)')
 
         # Set visibility
-        if not isVisible:
-            self.hide(item_id)
+        # if not isVisible:
+        #     self.hide(item_id)
 
         return item_id
 
