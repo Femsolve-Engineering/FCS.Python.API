@@ -98,9 +98,10 @@ class GeometryBuilder(object):
     def import_step(self, complete_path: str, get_assembly_info=False) -> GEOM_Object:
         return self.import_operations.import_step(complete_path, get_assembly_info)
 
-    def import_step_by_hierarchy(self, complete_path: str) -> list:
+    def import_step_by_hierarchy(self, complete_path: str) -> Tuple[List[str], List[str], List[GEOM_Object], List[bool]]:
         """
-        Returns a nested mapped list of shapes: [[list of names],[list of hierarchical location], [list of shapes]]
+        Returns a nested mapped list of shapes: 
+        [[list of names],[list of hierarchical location], [list of shapes], [list of true flags if part only]]
         """
         return self.import_operations.import_step_by_hierarchy(complete_path)
 
