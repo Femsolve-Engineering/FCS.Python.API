@@ -21,7 +21,7 @@ from PyFCS import GEOM_Object
 
 # Versioning check
 from PyFCS import check_api_compatibility, get_backend_api_version
-FCS_PYTHON_API_VERSION = "23.4.7.8"
+FCS_PYTHON_API_VERSION = "23.4.7.9"
 if not check_api_compatibility(FCS_PYTHON_API_VERSION):
     raise Exception(f"Incompatible backend API!\n"
                    f"Please make sure that a major version of {get_backend_api_version()} is used.")
@@ -436,95 +436,6 @@ class FCSViewer(object):
         is_ok = self.__try_send_request(self.viewer_request_url, msg_request)["status"]
         return is_ok
 
-    def add_to_document(self, entity: GEOM_Object, name: str, isVisible: bool = True) -> int:
-        """
-        Adds a brand new top-level component.
-        Legacy functionality: `salome.sg.addToStudy(model, name)`
-        """
-
-        if entity.is_null():
-            error_msg = f'FCSViewer: Cannot add `{name}` to document because its geometry representation is null!'
-            self.log.err(error_msg)
-            raise Exception(error_msg)
-
-        # Object order is not the same as the ID!
-        object_order = self.published_object_counter + 1
-        item_id = -1
-
-        export_stl_name = f"{object_order}_{name}.stl"
-        export_t2g_name = f"{object_order}_{name}_geom.json"
-
-        # STEP 1: EXPORT geometry
-        express_static_folder = f"{self.user_id}"
-        t2g_path_static = f'{express_static_folder}/{export_t2g_name}'
-        stl_path_static = f'{express_static_folder}/{export_stl_name}'
-        try:
-            export_to_path = self.working_directory
-            item_id = self.document_builder.add_to_document(entity, f"{object_order}_{name}", export_to_path)
-        except Exception as ex:
-            self.log.err(f"FCSViewer: Could not publish object named {name}. Failure: {ex.args}")
-            return item_id
-
-        # STEP 2: SEND data to frontend
-        msg_request = {
-            "operation":"add_to_document",
-            "arguments":{
-                "name" : name,
-                "isVisible": isVisible,
-                "item_id" : str(item_id),
-                "t2g_file" : export_t2g_name,
-                "stl_file" : export_stl_name,
-                "stl_path" : express_static_folder,
-                "stl_path_static" : stl_path_static,
-                "t2g_path_static" : t2g_path_static
-                }
-            }
-        
-        # Collect full paths to written out asset files
-        t2g_file_fullpath = os.path.join(self.working_directory, export_t2g_name)
-        stl_file_fullpath = os.path.join(self.working_directory, export_stl_name)
-
-        msg_response = self.__try_send_request_with_files(
-            self.viewer_request_url, 
-            msg_request,
-            [t2g_file_fullpath, stl_file_fullpath])
-
-        # ToDo: Increment only if response is correct
-        self.published_object_counter += 1
-        if self.log_debug_information:
-            self.log.dbg(f'FCSViewer DEBUG: Total number of published objects {self.published_object_counter}')
-
-        return item_id
-
-    def remove_from_document(self, object_id: int) -> None:
-        """
-        Removes all child entities under this ID. 
-        All components that were removed from the document
-        need to be updated. The removed_ids must contain the passed in ID itself.
-        """
-        
-        try:
-            self.log.dbg(f'FCSViewer: Will try and remove {object_id}...')
-            removed_ids = self.document_builder.remove_from_document(object_id)
-            if len(removed_ids) == 0:
-                self.log.wrn(f'FCSViewer: Did not remove {object_id} because it seems it is no longer in the document.')
-        except Exception as ex:
-            self.log.err(f'FCSViewer: Failed to remove {object_id}. Exception: {ex.args}')
-            return
-
-        removed_all_ids = []
-
-        removed_all_ids.extend(removed_ids)
-
-        msg_request = {
-            "operation": 'remove_from_document',
-            "arguments": {
-                "removedUIDs" : removed_all_ids,
-                },
-            }
-
-        msg_response = self.__try_send_request(self.viewer_request_url, msg_request)
-
     def translate_vector(self, object_id: int, vector_xyz: list) -> GEOM_Object:
         """
         Eltol egy vektor altal megadott iranyba es a vektor meretevel
@@ -682,6 +593,95 @@ class FCSViewer(object):
         self.published_object_counter += 1
 
         return item_id
+    
+    def add_to_document(self, entity: GEOM_Object, name: str, isVisible: bool = True) -> int:
+        """
+        Adds a brand new top-level component.
+        Legacy functionality: `salome.sg.addToStudy(model, name)`
+        """
+
+        if entity.is_null():
+            error_msg = f'FCSViewer: Cannot add `{name}` to document because its geometry representation is null!'
+            self.log.err(error_msg)
+            raise Exception(error_msg)
+
+        # Object order is not the same as the ID!
+        object_order = self.published_object_counter + 1
+        item_id = -1
+
+        export_stl_name = f"{object_order}_{name}.stl"
+        export_t2g_name = f"{object_order}_{name}_geom.json"
+
+        # STEP 1: EXPORT geometry
+        express_static_folder = f"{self.user_id}"
+        t2g_path_static = f'{express_static_folder}/{export_t2g_name}'
+        stl_path_static = f'{express_static_folder}/{export_stl_name}'
+        try:
+            export_to_path = self.working_directory
+            item_id = self.document_builder.add_to_document(entity, f"{object_order}_{name}", export_to_path)
+        except Exception as ex:
+            self.log.err(f"FCSViewer: Could not publish object named {name}. Failure: {ex.args}")
+            return item_id
+
+        # STEP 2: SEND data to frontend
+        msg_request = {
+            "operation":"add_to_document",
+            "arguments":{
+                "name" : name,
+                "isVisible": isVisible,
+                "item_id" : str(item_id),
+                "t2g_file" : export_t2g_name,
+                "stl_file" : export_stl_name,
+                "stl_path" : express_static_folder,
+                "stl_path_static" : stl_path_static,
+                "t2g_path_static" : t2g_path_static
+                }
+            }
+        
+        # Collect full paths to written out asset files
+        t2g_file_fullpath = os.path.join(self.working_directory, export_t2g_name)
+        stl_file_fullpath = os.path.join(self.working_directory, export_stl_name)
+
+        msg_response = self.__try_send_request_with_files(
+            self.viewer_request_url, 
+            msg_request,
+            [t2g_file_fullpath, stl_file_fullpath])
+
+        # ToDo: Increment only if response is correct
+        self.published_object_counter += 1
+        if self.log_debug_information:
+            self.log.dbg(f'FCSViewer DEBUG: Total number of published objects {self.published_object_counter}')
+
+        return item_id
+
+    def remove_from_document(self, object_id: int) -> None:
+        """
+        Removes all child entities under this ID. 
+        All components that were removed from the document
+        need to be updated. The removed_ids must contain the passed in ID itself.
+        """
+        
+        try:
+            self.log.dbg(f'FCSViewer: Will try and remove {object_id}...')
+            removed_ids = self.document_builder.remove_from_document(object_id)
+            if len(removed_ids) == 0:
+                self.log.wrn(f'FCSViewer: Did not remove {object_id} because it seems it is no longer in the document.')
+        except Exception as ex:
+            self.log.err(f'FCSViewer: Failed to remove {object_id}. Exception: {ex.args}')
+            return
+
+        removed_all_ids = []
+
+        removed_all_ids.extend(removed_ids)
+
+        msg_request = {
+            "operation": 'remove_from_document',
+            "arguments": {
+                "removedUIDs" : removed_all_ids,
+                },
+            }
+
+        msg_response = self.__try_send_request(self.viewer_request_url, msg_request)
 
 
     def add_to_document_under(self, entity: object, parent_entity_id: int, name: str, isVisible: bool = False) -> int:
@@ -791,16 +791,7 @@ class FCSViewer(object):
         # ToDo: Need to extend the GEOM_Object to store
         # GUIDs unique to every single GEOM_Object
 
-        #msg_request = {
-        #    "operation":"object_to_id",
-        #    "arguments":{
-        #        "object_guid": obj.get_guid()
-        #        }
-        #    }
-
-        #dict_result = self.__try_send_request(msg_request)
         return -1
-
 
     def set_specific_object_color(self, id: int, red: int, green: int, blue: int) -> None:
         """
@@ -811,7 +802,9 @@ class FCSViewer(object):
         """
         if id == -1: return
 
-        # self.__log(f"Set colour to input : (ID) {id}, (R) {red}, (G) {green}, (B) {blue}")
+        if id == 3832:
+            print('Debug')
+
         # Create paint 
         color = Palette.get_specific_colour(red, green, blue)
 
@@ -874,20 +867,6 @@ class FCSViewer(object):
 
         msg_response = self.__try_send_request(self.viewer_request_url, msg_request)
 
-    def send_data_to_viewer(self, data) -> None:
-        """
-        Sends custom data to viewer.
-        """
-
-        msg_request = {
-            "operation":"receive_data",
-            "arguments":{
-                "body" : data,
-                }
-            }
-
-        msg_response = self.__try_send_request(self.viewer_request_url, msg_request)
-
     def __try_send_request(self, viewer_url: str, request: dict) -> dict:
         """
         Private method to try forward request to cloud viewer.
@@ -928,9 +907,10 @@ class FCSViewer(object):
             # Define the multipart/form-data payload
             files = []
             for i, file_path in enumerate(file_paths):
-                with open(file_path, 'rb') as f:
-                    file_data = f.read()
-                files.append((f'file{i}', (file_path, io.BytesIO(file_data))))
+                if os.path.exists(file_path):
+                    with open(file_path, 'rb') as f:
+                        file_data = f.read()
+                    files.append((f'file{i}', (file_path, io.BytesIO(file_data))))
 
             data = {'message': json.dumps(request)}
             
