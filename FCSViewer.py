@@ -21,7 +21,7 @@ from PyFCS import GEOM_Object
 
 # Versioning check
 from PyFCS import check_api_compatibility, get_backend_api_version
-FCS_PYTHON_API_VERSION = "23.4.7.10"
+FCS_PYTHON_API_VERSION = "23.4.7.11"
 if not check_api_compatibility(FCS_PYTHON_API_VERSION):
     raise Exception(f"Incompatible backend API!\n"
                    f"Please make sure that a major version of {get_backend_api_version()} is used.")
@@ -272,13 +272,10 @@ class FCSViewer(object):
 
         _ = self.document_builder.set_object_visibility(entity_id, False)
 
-        entity_ids = []
-        entity_ids.append(entity_id)
-
         msg_request = {
                 "operation":"hide",
                 "arguments":{
-                    "entity_ids": entity_ids
+                    "entity_ids": [entity_id]
                     }
             }
 
@@ -332,16 +329,12 @@ class FCSViewer(object):
         Pass in unique ID of the object to activate entity in the viewer.              
         Legacy functionality: `salome.sg.Display(model_id)`
         """
-
-        #ToDo: Implement this on client side
-        return; 
-
         _ = self.document_builder.set_object_visibility(entity_id, True)
 
         msg_request = {
                 "operation": "show",
                 "arguments":{
-                    "entity_id": entity_id
+                    "entity_ids": [entity_id]
                     }
             }
 
