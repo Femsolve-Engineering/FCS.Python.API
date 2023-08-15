@@ -21,7 +21,7 @@ from PyFCS import GEOM_Object
 
 # Versioning check
 from PyFCS import check_api_compatibility, get_backend_api_version
-FCS_PYTHON_API_VERSION = "23.4.7.11"
+FCS_PYTHON_API_VERSION = "23.4.7.12"
 if not check_api_compatibility(FCS_PYTHON_API_VERSION):
     raise Exception(f"Incompatible backend API!\n"
                    f"Please make sure that a major version of {get_backend_api_version()} is used.")
@@ -604,14 +604,14 @@ class FCSViewer(object):
 
         return item_id
     
-    def add_to_document(self, entity: GEOM_Object, name: str, isVisible: bool = True) -> int:
+    def add_to_document(self, entity: GEOM_Object, geom_object_name: str, isVisible: bool = True) -> int:
         """
         Adds a brand new top-level component.
         Legacy functionality: `salome.sg.addToStudy(model, name)`
         """
 
         if entity.is_null():
-            error_msg = f'FCSViewer: Cannot add `{name}` to document because its geometry representation is null!'
+            error_msg = f'FCSViewer: Cannot add `{geom_object_name}` to document because its geometry representation is null!'
             self.log.err(error_msg)
             raise Exception(error_msg)
 
@@ -619,8 +619,8 @@ class FCSViewer(object):
         object_order = self.published_object_counter + 1
         item_id = -1
 
-        export_stl_name = f"{object_order}_{name}.stl"
-        export_t2g_name = f"{object_order}_{name}_geom.json"
+        export_stl_name = f"{object_order}_{geom_object_name}.stl"
+        export_t2g_name = f"{object_order}_{geom_object_name}_geom.json"
 
         # STEP 1: EXPORT geometry
         express_static_folder = f"{self.user_id}"
@@ -628,16 +628,26 @@ class FCSViewer(object):
         stl_path_static = f'{express_static_folder}/{export_stl_name}'
         try:
             export_to_path = self.working_directory
-            item_id = self.document_builder.add_to_document(entity, f"{object_order}_{name}", export_to_path)
+            item_id = self.document_builder.add_to_document(entity, geom_object_name, export_to_path)
+
+            # Rename files so in complex runs files do not overwrite each other
+            original_stl_file_path = os.path.join(export_to_path, f"{geom_object_name}.stl")
+            new_stl_file_path = os.path.join(export_to_path, export_stl_name)
+            os.rename(original_stl_file_path, new_stl_file_path)
+            
+            original_t2g_file_path = os.path.join(export_to_path, f"{geom_object_name}_geom.json")
+            new_t2g_file_path = os.path.join(export_to_path, export_t2g_name)
+            os.rename(original_t2g_file_path, new_t2g_file_path)
+
         except Exception as ex:
-            self.log.err(f"FCSViewer: Could not publish object named {name}. Failure: {ex.args}")
+            self.log.err(f"FCSViewer: Could not publish object named {geom_object_name}. Failure: {ex.args}")
             return item_id
 
         # STEP 2: SEND data to frontend
         msg_request = {
             "operation":"add_to_document",
             "arguments":{
-                "name" : name,
+                "name" : geom_object_name,
                 "isVisible": isVisible,
                 "item_id" : str(item_id),
                 "t2g_file" : export_t2g_name,
@@ -694,16 +704,16 @@ class FCSViewer(object):
         msg_response = self.__try_send_request(self.viewer_request_url, msg_request)
 
 
-    def add_to_document_under(self, entity: object, parent_entity_id: int, name: str, isVisible: bool = False) -> int:
+    def add_to_document_under(self, entity: object, parent_entity_id: int, geom_object_name: str, isVisible: bool = False) -> int:
         """
         Adds entity under a parent entity               
         Legacy functionality: `geompy.addToStudyInFather( self.Model, i_Face, str_Name )`
         """
 
         if self.log_debug_information:
-            self.log.dbg(f"FCSViewer DEBUG: Trying to add {name} under {parent_entity_id}.")
+            self.log.dbg(f"FCSViewer DEBUG: Trying to add {geom_object_name} under {parent_entity_id}.")
 
-        if entity == None or parent_entity_id == -1 or name == "":
+        if entity == None or parent_entity_id == -1 or geom_object_name == "":
             raise Exception("Wrong input data provided for add_to_document_under!")
 
         item_id = -1
@@ -712,8 +722,8 @@ class FCSViewer(object):
         # Object order is not the same as the ID!
         object_order = self.published_object_counter + 1
 
-        export_stl_name = f"{object_order}_{name}.stl"
-        export_t2g_name = f"{object_order}_{name}_geom.json"
+        export_stl_name = f"{object_order}_{geom_object_name}.stl"
+        export_t2g_name = f"{object_order}_{geom_object_name}_geom.json"
 
         # STEP 1: EXPORT geometry
         express_static_folder = f"{self.user_id}"
@@ -721,16 +731,26 @@ class FCSViewer(object):
         stl_path_static = f'{express_static_folder}/{export_stl_name}'
         try:
             export_to_path = self.working_directory
-            item_id = self.document_builder.add_to_document_under(entity, parent_entity_id, f"{object_order}_{name}", export_to_path)
+            item_id = self.document_builder.add_to_document_under(entity, parent_entity_id, geom_object_name, export_to_path)
+
+            # Rename files so in complex runs files do not overwrite each other
+            original_stl_file_path = os.path.join(export_to_path, f"{geom_object_name}.stl")
+            new_stl_file_path = os.path.join(export_to_path, export_stl_name)
+            os.rename(original_stl_file_path, new_stl_file_path)
+            
+            original_t2g_file_path = os.path.join(export_to_path, f"{geom_object_name}_geom.json")
+            new_t2g_file_path = os.path.join(export_to_path, export_t2g_name)
+            os.rename(original_t2g_file_path, new_t2g_file_path)
+
         except Exception as ex:
-            self.log.err(f"FCSViewer: Could not publish object named {name}. Failure: {ex.args}")
+            self.log.err(f"FCSViewer: Could not publish object named {geom_object_name}. Failure: {ex.args}")
             return item_id
 
         # STEP 2: SEND data to frontend
         msg_request = {
             "operation":"add_to_document_under",
             "arguments":{
-                "name" : name,
+                "name" : geom_object_name,
                 "isVisible": isVisible,
                 "item_id" : str(item_id),
                 "parent_id":str(parent_entity_id),
