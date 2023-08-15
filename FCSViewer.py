@@ -633,10 +633,14 @@ class FCSViewer(object):
             # Rename files so in complex runs files do not overwrite each other
             original_stl_file_path = os.path.join(export_to_path, f"{geom_object_name}.stl")
             new_stl_file_path = os.path.join(export_to_path, export_stl_name)
+            if os.path.exists(new_stl_file_path):
+                os.remove(new_stl_file_path)
             os.rename(original_stl_file_path, new_stl_file_path)
             
             original_t2g_file_path = os.path.join(export_to_path, f"{geom_object_name}_geom.json")
             new_t2g_file_path = os.path.join(export_to_path, export_t2g_name)
+            if os.path.exists(new_t2g_file_path):
+                os.remove(new_t2g_file_path)
             os.rename(original_t2g_file_path, new_t2g_file_path)
 
         except Exception as ex:
@@ -736,10 +740,14 @@ class FCSViewer(object):
             # Rename files so in complex runs files do not overwrite each other
             original_stl_file_path = os.path.join(export_to_path, f"{geom_object_name}.stl")
             new_stl_file_path = os.path.join(export_to_path, export_stl_name)
+            if os.path.exists(new_stl_file_path):
+                os.remove(new_stl_file_path)
             os.rename(original_stl_file_path, new_stl_file_path)
             
             original_t2g_file_path = os.path.join(export_to_path, f"{geom_object_name}_geom.json")
             new_t2g_file_path = os.path.join(export_to_path, export_t2g_name)
+            if os.path.exists(new_t2g_file_path):
+                os.remove(new_t2g_file_path)
             os.rename(original_t2g_file_path, new_t2g_file_path)
 
         except Exception as ex:
@@ -1013,4 +1021,3 @@ class FCSViewer(object):
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         path_to_log_file = os.path.join(self.working_directory, f'{self.user_id}_{timestamp}.log')
         return FCSLogger(self.user_id, path_to_log_file)
-
