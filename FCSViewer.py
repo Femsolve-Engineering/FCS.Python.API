@@ -36,14 +36,13 @@ class FCSViewer(object):
     The primary interactor of the FCS web viewer.
     """
 
-    def __init__(self, user_id: str='local', logger: FCSLogger=None):
+    def __init__(self, user_id: str='local', logger: FCSLogger=None, working_directory: str=None):
         """
-        During instantiation connects to a viewer instance. 
+        During instantiation connects to a viewer instance.
         """
-
         # `user_id` can be set to 'local' for debugging and dev purposes,
         # in production mode, this is filled in automatically
-        self.user_id = user_id 
+        self.user_id = user_id
         self.platform = platform
         self.document_builder = DocumentBuilder(gb.geom_engine)
         self.geometry_builder = gb
@@ -52,13 +51,12 @@ class FCSViewer(object):
             self.viewer_url = os.environ['FCS_BACKEND_URL']
         else:
             self.viewer_url = '127.0.0.1'
+
         self.viewer_request_url = f'http://{self.viewer_url}:{self.viewer_id}/toFrontend'
         self.is_available = self.has_active_viewer()
         self.is_viewer_compatible = self.has_compatible_viewer()
-        self.working_directory = self.__setup_working_directory()
-        if logger == None:
-            self.log: FCSLogger = self.__setup_logging()
-        else: self.log = logger
+        self.working_directory = self.__setup_working_directory() if working_directory == None else working_directory
+        self.log = self.__setup_logging() if logger == None else logger
         self.log_debug_information = False
         self.published_object_counter = 0
         self.nested_object_counter = 0
