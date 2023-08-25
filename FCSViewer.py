@@ -47,11 +47,7 @@ class FCSViewer(object):
         self.document_builder = DocumentBuilder(gb.geom_engine)
         self.geometry_builder = gb
         self.viewer_id = 3000
-        if 'FCS_BACKEND_URL' in os.environ:
-            self.viewer_url = os.environ['FCS_BACKEND_URL']
-        else:
-            self.viewer_url = '127.0.0.1'
-
+        self.viewer_url = '127.0.0.1' if not 'FCS_BACKEND_URL' in os.environ else os.environ['FCS_BACKEND_URL']
         self.viewer_request_url = f'http://{self.viewer_url}:{self.viewer_id}/toFrontend'
         self.is_available = self.has_active_viewer()
         self.is_viewer_compatible = self.has_compatible_viewer()
