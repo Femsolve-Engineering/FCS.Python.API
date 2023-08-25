@@ -27,7 +27,7 @@ if not check_api_compatibility(FCS_PYTHON_API_VERSION):
                    f"Please make sure that a major version of {get_backend_api_version()} is used.")
 
 # Global instance for not user or document bound operations
-global gb 
+global gb
 from GeometryBuilder import GeometryBuilder
 gb = GeometryBuilder()
 
@@ -633,13 +633,17 @@ class FCSViewer(object):
             new_stl_file_path = os.path.join(export_to_path, export_stl_name)
             if os.path.exists(new_stl_file_path):
                 os.remove(new_stl_file_path)
-            os.rename(original_stl_file_path, new_stl_file_path)
+
+            if os.path.exists(original_stl_file_path):
+                os.rename(original_stl_file_path, new_stl_file_path)
             
             original_t2g_file_path = os.path.join(export_to_path, f"{geom_object_name}_geom.json")
             new_t2g_file_path = os.path.join(export_to_path, export_t2g_name)
             if os.path.exists(new_t2g_file_path):
                 os.remove(new_t2g_file_path)
-            os.rename(original_t2g_file_path, new_t2g_file_path)
+
+            if os.path.exists(original_t2g_file_path):
+                os.rename(original_t2g_file_path, new_t2g_file_path)
 
         except Exception as ex:
             self.log.err(f"FCSViewer: Could not publish object named {geom_object_name}. Failure: {ex.args}")
@@ -740,13 +744,17 @@ class FCSViewer(object):
             new_stl_file_path = os.path.join(export_to_path, export_stl_name)
             if os.path.exists(new_stl_file_path):
                 os.remove(new_stl_file_path)
-            os.rename(original_stl_file_path, new_stl_file_path)
+
+            if os.path.exists(original_stl_file_path):
+                os.rename(original_stl_file_path, new_stl_file_path)
             
             original_t2g_file_path = os.path.join(export_to_path, f"{geom_object_name}_geom.json")
             new_t2g_file_path = os.path.join(export_to_path, export_t2g_name)
             if os.path.exists(new_t2g_file_path):
                 os.remove(new_t2g_file_path)
-            os.rename(original_t2g_file_path, new_t2g_file_path)
+            
+            if os.path.exists(original_t2g_file_path):    
+                os.rename(original_t2g_file_path, new_t2g_file_path)
 
         except Exception as ex:
             self.log.err(f"FCSViewer: Could not publish object named {geom_object_name}. Failure: {ex.args}")
