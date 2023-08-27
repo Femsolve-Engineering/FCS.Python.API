@@ -21,7 +21,7 @@ from PyFCS import GEOM_Object
 
 # Versioning check
 from PyFCS import check_api_compatibility, get_backend_api_version
-FCS_PYTHON_API_VERSION = "23.4.7.12"
+FCS_PYTHON_API_VERSION = "23.4.7.13"
 if not check_api_compatibility(FCS_PYTHON_API_VERSION):
     raise Exception(f"Incompatible backend API!\n"
                    f"Please make sure that a major version of {get_backend_api_version()} is used.")
@@ -613,6 +613,9 @@ class FCSViewer(object):
         object_order = self.published_object_counter + 1
         item_id = -1
 
+        # Sanitize name of unwanted characters
+        geom_object_name = self.__sanitize_name(geom_object_name)
+
         export_stl_name = f"{object_order}_{geom_object_name}.stl"
         export_t2g_name = f"{object_order}_{geom_object_name}_geom.json"
 
@@ -720,6 +723,9 @@ class FCSViewer(object):
 
         item_id = -1
         if parent_entity_id == -1: return item_id
+
+        # Sanitize name of unwanted characters
+        geom_object_name = self.__sanitize_name(geom_object_name)
 
         # Object order is not the same as the ID!
         object_order = self.published_object_counter + 1
@@ -1023,3 +1029,31 @@ class FCSViewer(object):
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         path_to_log_file = os.path.join(self.working_directory, f'{self.user_id}_{timestamp}.log')
         return FCSLogger(self.user_id, path_to_log_file)
+
+    def __sanitize_name(self, original_item_name: str) -> str:
+        """
+        Removes invalid characters in item name, so that when the STL file of the object is 
+        exported to hard-disk, it can be serialized. Invalid characters such as '\' or ':'
+        would cause errors when the file's written out.
+
+        This method also warns the 
+
+        Background: 
+            Added based on task FCS-244, where the item names had '\' characters and thus
+            during add_to_document operation it failed to generate STL and T2G file assets.
+        """
+        invalid_chars = r'\/:*?"<>|'
+        sanitized_name = ''
+        was_sanitized = False
+
+        for c in original_item_name:
+            if c in invalid_chars:
+                sanitized_name += '_'
+                was_sanitized = True
+            else:
+                sanitized_name += c
+
+        if was_sanitized:
+            self.log.wrn(f'The item name {original_item_name} had to be sanitized to {sanitized_name}!')
+
+        return sanitized_name
