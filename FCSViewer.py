@@ -46,9 +46,9 @@ class FCSViewer(object):
         self.platform = platform
         self.document_builder = DocumentBuilder(gb.geom_engine)
         self.geometry_builder = gb
-        self.viewer_id = 3000
-        self.viewer_url = '127.0.0.1' if not 'FCS_BACKEND_URL' in os.environ else os.environ['FCS_BACKEND_URL']
-        self.viewer_request_url = f'http://{self.viewer_url}:{self.viewer_id}/toFrontend'
+        self.viewer_url = '127.0.0.1' if not 'FCS_BACKEND_URL' in os.environ else os.environ['FCS_BACKEND_URL'].split(':')[0]
+        self.viewer_port = 3000 if not 'FCS_BACKEND_URL' in os.environ else int(os.environ['FCS_BACKEND_URL'].split(':')[1])
+        self.viewer_request_url = f'http://{self.viewer_url}:{self.viewer_port}/toFrontend'
         self.is_available = self.has_active_viewer()
         self.is_viewer_compatible = self.has_compatible_viewer()
         self.working_directory = self.__setup_working_directory() if working_directory == None else working_directory
@@ -91,7 +91,7 @@ class FCSViewer(object):
                 return s.connect_ex((f'{self.viewer_url}', port)) == 0
 
         try:
-            is_running = is_port_in_use(self.viewer_id)
+            is_running = is_port_in_use(self.viewer_port)
             return is_running                      
         except Exception as ex:
             print(f"has_active_viewer failed: {ex}. Will assume no Viewer is connected!")
@@ -105,7 +105,7 @@ class FCSViewer(object):
 
         if not self.is_available: return False
 
-        response = requests.get(f"http://{self.viewer_url}:{self.viewer_id}/version", verify=False)
+        response = requests.get(f"http://{self.viewer_url}:{self.viewer_port}/version", verify=False)
 
         viewer_version = response.text
         if not check_api_compatibility(viewer_version):
