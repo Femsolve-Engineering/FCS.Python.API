@@ -26,6 +26,8 @@ if not check_api_compatibility(FCS_PYTHON_API_VERSION):
     raise Exception(f"Incompatible backend API!\n"
                    f"Please make sure that a major version of {get_backend_api_version()} is used.")
 
+UINT32_MAX = (1 << 32) - 1
+
 # Global instance for not user or document bound operations
 global gb
 from GeometryBuilder import GeometryBuilder
@@ -626,6 +628,9 @@ class FCSViewer(object):
         try:
             export_to_path = self.working_directory
             item_id = self.document_builder.add_to_document(entity, geom_object_name, export_to_path)
+            if item_id == UINT32_MAX:
+                self.log.err("Max ID was returned, thus shape could not be properly processed!")
+                return -1
 
             # Rename files so in complex runs files do not overwrite each other
             original_stl_file_path = os.path.join(export_to_path, f"{geom_object_name}.stl")
@@ -740,6 +745,9 @@ class FCSViewer(object):
         try:
             export_to_path = self.working_directory
             item_id = self.document_builder.add_to_document_under(entity, parent_entity_id, geom_object_name, export_to_path)
+            if item_id == UINT32_MAX:
+                self.log.err("Max ID was returned, thus shape could not be properly processed!")
+                return -1
 
             # Rename files so in complex runs files do not overwrite each other
             original_stl_file_path = os.path.join(export_to_path, f"{geom_object_name}.stl")
