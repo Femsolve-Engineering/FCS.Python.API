@@ -45,26 +45,26 @@ class FCSLogger:
         return self.path_to_log_file
 
     def log(self, message: str):
-        clean_message = message.encode('ascii', 'replace').decode('ascii')
+        clean_message = str(message).encode('ascii', 'replace').decode('ascii')
         self.logger.info(clean_message)
 
     def dbg(self, message: str):
-        clean_message = message.encode('ascii', 'replace').decode('ascii')
+        clean_message = str(message).encode('ascii', 'replace').decode('ascii')
         self.logger.debug(clean_message)
 
     def wrn(self, message: str):
-        clean_message = message.encode('ascii', 'replace').decode('ascii')
+        clean_message = str(message).encode('ascii', 'replace').decode('ascii')
         self.logger.warn(clean_message)
 
     def err(self, message: str):
-        clean_message = message.encode('ascii', 'replace').decode('ascii')
+        clean_message = str(message).encode('ascii', 'replace').decode('ascii')
         self.logger.error(clean_message)
 
     def fatal(self, message: str):
         """These should be errors that indicate the binary backend 
         failed or created unexpected results.
         """
-        clean_message = message.encode('ascii', 'replace').decode('ascii')
+        clean_message = str(message).encode('ascii', 'replace').decode('ascii')
         self.logger.critical(clean_message)
 
 def create_generic_logger(name_of_logger: str) -> FCSLogger:
