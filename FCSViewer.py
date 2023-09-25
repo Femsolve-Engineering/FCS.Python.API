@@ -21,7 +21,7 @@ from PyFCS import GEOM_Object
 
 # Versioning check
 from PyFCS import check_api_compatibility, get_backend_api_version
-FCS_PYTHON_API_VERSION = "23.4.7.13"
+FCS_PYTHON_API_VERSION = "23.4.7.14"
 if not check_api_compatibility(FCS_PYTHON_API_VERSION):
     raise Exception(f"Incompatible backend API!\n"
                    f"Please make sure that a major version of {get_backend_api_version()} is used.")
@@ -48,8 +48,14 @@ class FCSViewer(object):
         self.platform = platform
         self.document_builder = DocumentBuilder(gb.geom_engine)
         self.geometry_builder = gb
-        self.viewer_url = '127.0.0.1' if not 'FCS_BACKEND_URL' in os.environ else os.environ['FCS_BACKEND_URL'].split(':')[0]
-        self.viewer_port = 3000 if not 'FCS_BACKEND_URL' in os.environ else int(os.environ['FCS_BACKEND_URL'].split(':')[1])
+        # Considers local and production development
+        self.viewer_url = '127.0.0.1'
+        self.viewer_port = 3000
+        if 'FCS_BACKEND_URL' in os.environ and ':' in os.environ['FCS_BACKEND_URL']:
+            self.viewer_url = os.environ['FCS_BACKEND_URL'].split(':')[0]
+            self.viewer_port = int(os.environ['FCS_BACKEND_URL'].split(':')[1])
+        else:
+            self.viewer_url = 'host.docker.internal'
         self.viewer_request_url = f'http://{self.viewer_url}:{self.viewer_port}/toFrontend'
         self.is_available = self.has_active_viewer()
         self.is_viewer_compatible = self.has_compatible_viewer()
