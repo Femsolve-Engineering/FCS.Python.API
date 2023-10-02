@@ -56,7 +56,7 @@ class FCSViewer(object):
             self.viewer_port = int(os.environ['FCS_BACKEND_URL'].split(':')[1])
         else:
             self.viewer_url = 'host.docker.internal'
-        self.viewer_request_url = f'http://{self.viewer_url}:{self.viewer_port}/toFrontend'
+        self.viewer_request_url = f'http://{self.viewer_url}:{self.viewer_port}/viewer/toFrontend'
         self.is_available = self.has_active_viewer()
         self.is_viewer_compatible = self.has_compatible_viewer()
         self.working_directory = self.__setup_working_directory() if working_directory == None else working_directory
