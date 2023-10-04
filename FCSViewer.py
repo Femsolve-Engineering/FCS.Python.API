@@ -67,7 +67,7 @@ class FCSViewer(object):
         # ToDo: For Docker use purposes always send the requests
         if 'docker' in self.viewer_request_url:
             if not self.is_available:
-                self.log('Overriding is_available boolean so that requests can be sent!')
+                self.log.log('Overriding is_available boolean so that requests can be sent!')
                 self.is_available = True
         self.published_object_counter = 0
         self.nested_object_counter = 0
@@ -992,11 +992,13 @@ class FCSViewer(object):
             
             # Send the POST request
             response = requests.post(viewer_url, files=files, data=data, verify=False)
-            
+            self.log.log(f'Response: {response}!')
             dict_result = {
                 "status" : True
             }
-        except:
+
+        except Exception as ex:
+            self.log.log(f'Exception occured during request sending: {ex}!')
             dict_result = {
                 "status": False
             }
