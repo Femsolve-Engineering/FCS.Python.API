@@ -58,11 +58,17 @@ class FCSViewer(object):
             self.viewer_url = 'host.docker.internal'
         self.viewer_request_url = f'http://{self.viewer_url}:{self.viewer_port}/viewer/toFrontend'
         self.is_available = self.has_active_viewer()
-        self.is_viewer_compatible = self.has_compatible_viewer()
+        # ToDo: Reinstate compatibility check
+        # self.is_viewer_compatible = self.has_compatible_viewer()
         self.working_directory = self.__setup_working_directory() if working_directory == None else working_directory
         self.log = self.__setup_logging() if logger == None else logger
         self.log.log(f'Viewer request URL will be {self.viewer_request_url}.')
         self.log_debug_information = False
+        # ToDo: For Docker use purposes always send the requests
+        if 'docker' in self.viewer_request_url:
+            if not self.is_available:
+                self.log('Overriding is_available boolean so that requests can be sent!')
+                self.is_available = True
         self.published_object_counter = 0
         self.nested_object_counter = 0
         self.active_document_name = self.document_builder.get_document_name()
