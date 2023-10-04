@@ -61,6 +61,7 @@ class FCSViewer(object):
         self.is_viewer_compatible = self.has_compatible_viewer()
         self.working_directory = self.__setup_working_directory() if working_directory == None else working_directory
         self.log = self.__setup_logging() if logger == None else logger
+        self.log.log(f'Viewer request URL will be {self.viewer_request_url}.')
         self.log_debug_information = False
         self.published_object_counter = 0
         self.nested_object_counter = 0
