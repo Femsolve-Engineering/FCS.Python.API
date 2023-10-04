@@ -932,9 +932,14 @@ class FCSViewer(object):
         Private method to try forward request to cloud viewer.
         """
 
-        if not self.is_available: return {
+        self.log.log(f"Sending request to viewer... {request}")
+
+        if not self.is_available: 
+            self.log.log(f"Oops, sorry, we are not sending anything to viewer because it is not available!")
+            return {
             "status" : True
             }
+
         
         request['user_id'] = self.user_id
         dict_result: dict = None
@@ -957,9 +962,13 @@ class FCSViewer(object):
         Private method to try forward request to cloud viewer WITH files.
         """
 
-        if not self.is_available: return {
+        self.log.log(f"Sending request to viewer... {request}")
+
+        if not self.is_available: 
+            self.log.log(f"Oops, sorry, we are not sending anything to viewer because it is not available!")
+            return {
             "status" : True
-        }
+            }
 
         request['user_id'] = self.user_id
         dict_result: dict = None
