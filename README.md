@@ -1,7 +1,33 @@
 # Python API to Femsolve Cloud Services
 Provides Python methods bound to high-performance libraries for fast delivery of engineering applications.
 
+## Setup
+### Windows
+Make sure you have Python 3.11 installed. Find the installation directory of Python 3.11 and create the required
+environment for it using the following commands. Open a CMD in the root directory of the Python API. 
+Step 1: Create environment:
+`%USERPROFILE%\AppData\Local\Programs\Python\Python311\python.exe -m venv envFCS`
+Step 2: Activate the environment:
+`.\envFCS\Scripts\activate`
+Step 3: Install packages
+`pip install -r requirements.txt`
+Step 4: Deactivate if finished (optional)
+`deactivate`
+
+
+### Linux
+Make sure you have Python 3.11 installed. You can typically use `python3.11` to refer to Python 3.11 on Linux. Open a terminal in the root directory of the Python API.
+Step 1: Create environment:
+`python3.11 -m venv envFCS`
+Step 2: Activate the environment:
+`source envFCS/bin/activate`
+Step 3: Install packages:
+`pip install -r requirements.txt`
+Step 4: Deactivate if finished (optional):
+`deactivate`
+
 ## Version Log
+- 23.4.7.10  - Upgraded Python 3.6 to 3.11 support. Documented in README file the setup.
 - 23.4.7.9   - Hotfix based on most recent testings of STH analysis
 - 23.4.7.8   - Added 'is_shape_null' to check if the shape stored in the GEOM object it not null (result of failed import/operations)
 - 23.4.7.3   - Added 'is_null' method to check if GEOM object is not null (result of invalid operation)
