@@ -969,10 +969,10 @@ class FCSViewer(object):
         Private method to try forward request to cloud viewer WITH files.
         """
 
-        self.log.log(f"Sending request to viewer... {request}")
+        self.log.dbg(f"Sending request to viewer... {request}")
 
         if not self.is_available: 
-            self.log.log(f"Oops, sorry, we are not sending anything to viewer because it is not available!")
+            self.log.dbg(f"Oops, sorry, we are not sending anything to viewer because it is not available!")
             return {
             "status" : True
             }
@@ -992,13 +992,13 @@ class FCSViewer(object):
             
             # Send the POST request
             response = requests.post(viewer_url, files=files, data=data, verify=False)
-            self.log.log(f'Response: {response}!')
+            self.log.dbg(f'Response: {response}!')
             dict_result = {
                 "status" : True
             }
 
         except Exception as ex:
-            self.log.log(f'Exception occured during request sending: {ex}!')
+            self.log.err(f'Exception occured during request sending: {ex}!')
             dict_result = {
                 "status": False
             }
