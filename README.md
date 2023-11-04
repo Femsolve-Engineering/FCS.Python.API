@@ -27,6 +27,7 @@ Step 4: Deactivate if finished (optional):
 `deactivate`
 
 ## Version Log
+- 23.4.7.11  - Do not close document after saving it.
 - 23.4.7.10  - Upgraded Python 3.6 to 3.11 support. Documented in README file the setup.
 - 23.4.7.9   - Hotfix based on most recent testings of STH analysis
 - 23.4.7.8   - Added 'is_shape_null' to check if the shape stored in the GEOM object it not null (result of failed import/operations)

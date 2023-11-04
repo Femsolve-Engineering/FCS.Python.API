@@ -280,7 +280,7 @@ class FCSViewer(object):
         model_path = f"{self.user_id}/{self.active_document_name}.cbf"
 
         if self.document_builder.save_document_to(self.working_directory):
-            self.document_builder.close_document()
+            self.log.log(f'Successfully saved model document to {model_path}')
 
         msg_request = {
             "operation":"commit_to_document",
