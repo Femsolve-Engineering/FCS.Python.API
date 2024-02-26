@@ -613,7 +613,7 @@ class FCSViewer(object):
 
         return item_id
     
-    def add_to_document(self, entity: GEOM_Object, geom_object_name: str, isVisible: bool = True) -> int:
+    def add_to_document(self, entity: GEOM_Object, geom_object_name: str, isVisible: bool = True, add_with_refined_size: bool = True) -> int:
         """
         Adds a brand new top-level component.
         Legacy functionality: `salome.sg.addToStudy(model, name)`
@@ -640,7 +640,7 @@ class FCSViewer(object):
         stl_path_static = f'{express_static_folder}/{export_stl_name}'
         try:
             export_to_path = self.working_directory
-            item_id = self.document_builder.add_to_document(entity, geom_object_name, export_to_path)
+            item_id = self.document_builder.add_to_document(entity, geom_object_name, export_to_path, add_with_refined_size)
             if item_id == UINT32_MAX:
                 self.log.err("Max ID was returned, thus shape could not be properly processed!")
                 return -1
@@ -727,7 +727,7 @@ class FCSViewer(object):
         msg_response = self.__try_send_request(self.viewer_request_url, msg_request)
 
 
-    def add_to_document_under(self, entity: object, parent_entity_id: int, geom_object_name: str, isVisible: bool = False) -> int:
+    def add_to_document_under(self, entity: object, parent_entity_id: int, geom_object_name: str, isVisible: bool = False, add_with_refined_size: bool = True) -> int:
         """
         Adds entity under a parent entity               
         Legacy functionality: `geompy.addToStudyInFather( self.Model, i_Face, str_Name )`
@@ -757,7 +757,7 @@ class FCSViewer(object):
         stl_path_static = f'{express_static_folder}/{export_stl_name}'
         try:
             export_to_path = self.working_directory
-            item_id = self.document_builder.add_to_document_under(entity, parent_entity_id, geom_object_name, export_to_path)
+            item_id = self.document_builder.add_to_document_under(entity, parent_entity_id, geom_object_name, export_to_path, add_with_refined_size)
             if item_id == UINT32_MAX:
                 self.log.err("Max ID was returned, thus shape could not be properly processed!")
                 return -1
